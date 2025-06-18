@@ -22,7 +22,7 @@ exports.handler = async (event) => {
 
   try {
     const result = await dynamo.query({
-      TableName: process.env.TABLE_NAME,
+      TableName: process.env.MY_TABLE_NAME,
       KeyConditionExpression: "#ident = :ident AND #minute BETWEEN :from AND :to",
       ExpressionAttributeNames: {
         "#ident": "ident",
