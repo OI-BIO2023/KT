@@ -10,7 +10,7 @@ client.on('connect', () => {
   console.log("MQTT verbunden");
 
   // nur Topic event abonnieren
-  client.subscribe("event");
+  client.subscribe("value");
 });
 
 client.on('message', (topic, message) => {
