@@ -22,12 +22,12 @@
       position: absolute;
       background: rgba(255,255,255,0.7);
       border: 1px solid black;
-      padding: 1px 3px;
+      padding: 1px 3px;                /* schmaler */
       font-family: Arial, sans-serif;
-      font-size: clamp(8px, 1.5vw, 12px);
+      font-size: clamp(8px, 1vw, 12px); /* insgesamt kleiner */
       white-space: nowrap;
-      min-width: 60px;
-      max-width: 120px;
+      min-width: 50px;
+      max-width: 110px;
       text-align: center;
       border-radius: 4px;
     }
@@ -44,6 +44,7 @@
     @media (max-width: 600px) {
       .value-overlay {
         padding: 0.5px 2px;
+        font-size: 8px;
       }
       #tempT1   { top: 72%; left: 65%; }
       #tempT2   { top: 38%; left: 75%; }
