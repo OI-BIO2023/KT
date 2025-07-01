@@ -16,13 +16,17 @@ const userSensors = [
   "T2", "T4", "TF1"
 ];
 
-async function fetchData() {
-  const res = await fetch("/.netlify/functions/data");
+async function fetchData(start, end, ident) {
+  const res = await fetch(`/.netlify/functions/data?ident=${ident}&start=${start}&end=${end}`);
   return res.json();
 }
 
 async function init() {
-  allData = await fetchData();
+  allData = await fetchData(
+    document.getElementById("startDateTime").value,
+    document.getElementById("endDateTime").value,
+    document.getElementById("identSelect").value || "Solos"
+  );
 
   const idents = [...new Set(
     allData
