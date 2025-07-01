@@ -12,6 +12,48 @@ const biomassSensors = [
   "K.T20","K.T21","K.T22","K.T23","K.T24","K.T25","K.T26","K.T27","K.T28"
 ];
 
+const sensorLabels = {
+  "K.T1": "T IN Puffer",
+  "K.T2": "T Puffer oben",
+  "K.T3": "T Puffer unten",
+  "K.T4": "T IN Biomasse R1",
+  "K.T5": "T Außen",
+  "K.T6": "T IN Biomasse R2",
+  "K.T7": "Puffer R2 unten",
+  "K.T8": "Puffer R2 oben",
+  "K.T9": "T OUT R2 zu WT",
+  "K.T10": "T Biomasse R1 Seite A unten",
+  "K.T11": "T Biomasse R1 Seite A mitte",
+  "K.T12": "T Biomasse R1 Seite A oben",
+  "K.T13": "T Biomasse R1 Seite B unten",
+  "K.T14": "T Biomasse R1 Seite B mitte",
+  "K.T15": "T Biomasse R1 Seite B oben",
+  "K.T16": "T Biomasse R1 Seite C unten",
+  "K.T17": "T Biomasse R1 Seite C mitte",
+  "K.T18": "T Biomasse R1 Seite C oben",
+  "K.T20": "T Biomasse R2 Seite A unten",
+  "K.T21": "T Biomasse R2 Seite A mitte",
+  "K.T22": "T Biomasse R2 Seite A oben",
+  "K.T23": "T Biomasse R2 Seite B unten",
+  "K.T24": "T Biomasse R2 Seite B mitte",
+  "K.T25": "T Biomasse R2 Seite B oben",
+  "K.T26": "T Biomasse R2 Seite C unten",
+  "K.T27": "T Biomasse R2 Seite C mitte",
+  "K.T28": "T Biomasse R2 Seite C oben",
+  "T1": "T VL Free Heating",
+  "T2": "T Puffer Verbraucher unten",
+  "T4": "T WT Verbraucherseite",
+  "K.TF1": "T OUT Puffer",
+  "K.TF4": "T IN Frischwasser",
+  "K.TF2": "T OUT EX latent A",
+  "K.TF3": "T OUT EX sensible B",
+  "K.TF7": "T OUT EX R2 latent A",
+  "K.TF8": "T OUT EX R2 sensible B",
+  "K.TF11": "T IN Frischwasser R2",
+  "TF1": "T RL Free Heating"
+};
+
+
 const userSensors = [
   "T2", "T4", "TF1"
 ];
@@ -118,7 +160,7 @@ function buildDatasets(data, sensors) {
       y: Number(item[sensor] || 0)
     }));
     return {
-      label: sensor,
+      label: sensorLabels[sensor] || sensor,
       data: values,
       fill: false,
       borderColor: randomColor(sensor),
@@ -151,7 +193,7 @@ function renderChart(canvasId, datasets, chartLabel, filteredData) {
           time: {
             tooltipFormat: "yyyy-MM-dd HH:mm",
             displayFormats: {
-              minute: "HH:mm",
+              unit: window.innerWidth < 600 ? "day" : "hour",
               hour: "dd.MM HH:mm"
             },
             unit: "minute",
