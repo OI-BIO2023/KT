@@ -102,19 +102,20 @@ async function init() {
 
 function generateCheckboxes(containerId, sensorList) {
   const container = document.getElementById(containerId);
-  container.innerHTML = ""; // leeren, falls mehrfach gerendert
+  container.innerHTML = "";
   sensorList.forEach(sensor => {
     const label = document.createElement("label");
     const checkbox = document.createElement("input");
     checkbox.type = "checkbox";
     checkbox.value = sensor;
-    checkbox.checked = true;  // standardmäßig an
+    checkbox.checked = true;
     checkbox.addEventListener("change", () => renderCharts());
     label.appendChild(checkbox);
-    label.append(` ${sensor} `);
+    label.append(` ${sensorLabels[sensor] || sensor} `); // statt nur sensor
     container.appendChild(label);
   });
 }
+
 
 async function renderCharts() {
   const selectedIdent = document.getElementById("identSelect").value;
@@ -183,6 +184,7 @@ function renderChart(canvasId, datasets, chartLabel, filteredData) {
     },
     options: {
       responsive: true,
+      maintainAspectRatio: false,
       plugins: {
         legend: { position: "top" },
         title: { display: true, text: chartLabel }
