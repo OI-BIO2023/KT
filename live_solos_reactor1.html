@@ -1,9 +1,40 @@
-<div id="solos_reactor1" style="position: relative;">
-  <img src="Solos_Reactor1.jpg" style="width: 100%;" />
-  <div id="tempT1" style="position:absolute; top:100px; left:200px; background:white; padding:2px; border:1px solid black;">
-    T1: -- °C
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Echtzeit Solos Reaktor 1</title>
+  <style>
+    body { margin: 0; }
+    #schema-container {
+      position: relative;
+      width: 100%;
+      height: auto;
+    }
+    #schema-container img {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+    .value-overlay {
+      position: absolute;
+      background: rgba(255,255,255,0.8);
+      border: 1px solid black;
+      padding: 2px 5px;
+      font-family: Arial, sans-serif;
+      font-size: 14px;
+    }
+  </style>
+  <!-- mqtt.js CDN -->
+  <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+</head>
+<body>
+  <div id="schema-container">
+    <img src="images/Solos_Reactor1.jpg" alt="Schema" />
+    <div id="tempT1" class="value-overlay" style="top: 100px; left: 200px;">T1: -- °C</div>
+    <div id="tempT2" class="value-overlay" style="top: 200px; left: 250px;">T2: -- °C</div>
   </div>
-  <div id="tempT2" style="position:absolute; top:200px; left:300px; background:white; padding:2px; border:1px solid black;">
-    T2: -- °C
-  </div>
-</div>
+
+  <script src="live_solos_reactor1.js"></script>
+</body>
+</html>
