@@ -80,28 +80,47 @@ function renderCharts() {
 
   let filtered = allData.filter(item => item.ident === selectedIdent);
 
+  // Zeitfilter
   if (startTime) {
-    filtered = filtered.filter(item => new Date(item.minute) >= new Date(startTime));
+    const startDate = new Date(startTime);
+    filtered = filtered.filter(item => new Date(item.minute) >= startDate);
   }
   if (endTime) {
-    filtered = filtered.filter(item => new Date(item.minute) <= new Date(endTime));
+    const endDate = new Date(endTime);
+    filtered = filtered.filter(item => new Date(item.minute) <= endDate);
   }
 
   // REACTOR
   const reactorActiveSensors = getActiveSensors("reactorCheckboxes");
   const reactorDatasets = buildDatasets(filtered, reactorActiveSensors);
-  renderChart("reactorChart", reactorDatasets, "Reactor Temperaturen", filtered);
+  renderChart(
+    "reactorChart",
+    reactorDatasets,
+    "Reactor Temperaturen",
+    filtered
+  );
 
   // BIOMASS
   const biomassActiveSensors = getActiveSensors("biomassCheckboxes");
   const biomassDatasets = buildDatasets(filtered, biomassActiveSensors);
-  renderChart("biomassChart", biomassDatasets, "Biomass Temperaturen", filtered);
+  renderChart(
+    "biomassChart",
+    biomassDatasets,
+    "Biomass Temperaturen",
+    filtered
+  );
 
   // USER
   const userActiveSensors = getActiveSensors("userCheckboxes");
   const userDatasets = buildDatasets(filtered, userActiveSensors);
-  renderChart("userChart", userDatasets, "User Temperaturen", filtered);
+  renderChart(
+    "userChart",
+    userDatasets,
+    "User Temperaturen",
+    filtered
+  );
 }
+
 
 function getActiveSensors(containerId) {
   const checkboxes = document.getElementById(containerId).querySelectorAll("input[type=checkbox]");
