@@ -1,5 +1,5 @@
-import { DynamoDBClient, ScanCommand } from "@aws-sdk/client-dynamodb";
-import { unmarshall } from "@aws-sdk/util-dynamodb";
+const { DynamoDBClient, ScanCommand } = require("@aws-sdk/client-dynamodb");
+const { unmarshall } = require("@aws-sdk/util-dynamodb");
 
 const client = new DynamoDBClient({
   region: process.env.MY_AWS_REGION,
@@ -9,38 +9,28 @@ const client = new DynamoDBClient({
   },
 });
 
-export async function handler(event, context) {
+exports.handler = async function (event, context) {
   try {
     const params = {
-      TableName: "MQTT_KT", // hier deinen DynamoDB Tabellennamen einsetzen
-      Limit: 1000, // zum Start nicht gleich Millionen abrufen
+      TableName: "MQTT_KT",   // dein Tabellenname
+      Limit: 1000,            // nicht zu groß starten
     };
 
     const command = new ScanCommand(params);
     const data = await client.send(command);
 
-    // DynamoDB liefert Daten als Attribute-Map
     const items = data.Items.map((item) => unmarshall(item));
 
     return {
       statusCode: 200,
-      body: JSON.stringify({
-        count: items.length,
-        preview: items.slice(0,5), // zeige nur die ersten 5
-        allItems: items,
-      }),
+      body: JSON.stringify(items),
       headers: { "Content-Type": "application/json" },
     };
   } catch (err) {
     console.error(err);
     return {
       statusCode: 500,
-      body: JSON.stringify({ error: "Fehler beim Abruf aus DynamoDB" }),
-    };
-  }
-}
-      statusCode: 500,
-      body: JSON.stringify({ error: err.message })
+      body: JSON.stringify({ error: err.message }),
     };
   }
 };
