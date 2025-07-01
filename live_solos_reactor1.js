@@ -48,16 +48,16 @@ client.on('message', (topic, message) => {
     const kT16 = data["K.T16"] ?? null;
 
     if (kT12 && kT15 && kT18) {
-      const T_up = (kT12 + kT15 + kT18) / 3;
-      document.getElementById("tempBioUp").innerHTML = `T_up: ${T_up.toFixed(1)} °C`;
+      const T_low = (kT12 + kT15 + kT18) / 3;
+      document.getElementById("tempBioLow").innerHTML = `T_low: ${T_low.toFixed(1)} °C`;
     }
     if (kT11 && kT14 && kT17) {
       const T_mid = (kT11 + kT14 + kT17) / 3;
       document.getElementById("tempBioMid").innerHTML = `T_mid: ${T_mid.toFixed(1)} °C`;
     }
     if (kT10 && kT13 && kT16) {
-      const T_low = (kT10 + kT13 + kT16) / 3;
-      document.getElementById("tempBioLow").innerHTML = `T_low: ${T_low.toFixed(1)} °C`;
+      const T_up = (kT10 + kT13 + kT16) / 3;
+      document.getElementById("tempBioUp").innerHTML = `T_up: ${T_up.toFixed(1)} °C`;
     }
 
   } catch (err) {
