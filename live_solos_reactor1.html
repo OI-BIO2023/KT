@@ -20,18 +20,36 @@
     }
     .value-overlay {
       position: absolute;
-      background: rgba(255,255,255,0.6);
+      background: rgba(255,255,255,0.7);
       border: 1px solid black;
       padding: 2px 5px;
       font-family: Arial, sans-serif;
-      font-size: 1.8vw;
+      font-size: clamp(10px, 1.5vw, 14px);
+      white-space: nowrap;
+      min-width: 60px;
+      max-width: 120px;
+      text-align: center;
+      border-radius: 4px;
     }
-    
+    /* Positionen in Prozent für Desktop */
+    #tempT1   { top: 72%; left: 77%; }
+    #tempT2   { top: 38%; left: 87%; }
+    #tempT3   { top: 72%; left: 87%; }
+    #tempT5   { top: 18%; left: 19%; }
+    #tempTF1  { top: 43%; left: 77%; }
+    #tempBioUp  { top: 41%; left: 8%; }
+    #tempBioMid { top: 55%; left: 8%; }
+    #tempBioLow { top: 70%; left: 8%; }
+    /* responsive Anpassung bei Smartphones */
     @media (max-width: 600px) {
-      .value-overlay {
-        font-size: 10px;
-        padding: 1px 3px;
-      }
+      #tempT1   { top: 72%; left: 65%; }
+      #tempT2   { top: 38%; left: 75%; }
+      #tempT3   { top: 72%; left: 75%; }
+      #tempT5   { top: 18%; left: 15%; }
+      #tempTF1  { top: 43%; left: 65%; }
+      #tempBioUp  { top: 41%; left: 10%; }
+      #tempBioMid { top: 55%; left: 10%; }
+      #tempBioLow { top: 70%; left: 10%; }
     }
     a {
       display: block;
@@ -47,18 +65,18 @@
 </head>
 <body>
   <div id="schema-container">
-    <div id="tempT1" class="value-overlay" style="top: 72%; left: 77%;">T1: --°C</div>
-    <div id="tempT2" class="value-overlay" style="top: 38%; left: 85%;">T2: --°C</div>
-    <div id="tempT3" class="value-overlay" style="top: 72%; left: 85%;">T3: --°C</div>
-    <div id="tempT5" class="value-overlay" style="top: 18%; left: 18%;">T5: --°C</div>
-    <div id="tempTF1" class="value-overlay" style="top: 43%; left: 77%;">TF1: --°C</div>
-    <div id="tempBioUp" class="value-overlay" style="top: 41%; left: 8%;">T_up: --°C</div>
-    <div id="tempBioMid" class="value-overlay" style="top: 55%; left: 8%;">T_mid: --°C</div>
-    <div id="tempBioLow" class="value-overlay" style="top: 70%; left: 8%;">T_low: --°C</div>
+    <div id="tempT1" class="value-overlay">T1: -- °C</div>
+    <div id="tempT2" class="value-overlay">T2: -- °C</div>
+    <div id="tempT3" class="value-overlay">T3: -- °C</div>
+    <div id="tempT5" class="value-overlay">T5: -- °C</div>
+    <div id="tempTF1" class="value-overlay">TF1: -- °C</div>
+    <div id="tempBioUp" class="value-overlay">T_up: -- °C</div>
+    <div id="tempBioMid" class="value-overlay">T_mid: -- °C</div>
+    <div id="tempBioLow" class="value-overlay">T_low: -- °C</div>
   </div>
 
   <a href="index.html">🔙 Zurück zur Hauptseite</a>
-  
+
   <script src="live_solos_reactor1.js"></script>
 </body>
 </html>
