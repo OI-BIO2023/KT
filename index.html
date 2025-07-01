@@ -1,78 +1,41 @@
-<!-- index.html -->
 <!DOCTYPE html>
 <html lang="de">
 <head>
   <meta charset="UTF-8" />
-  <title>Anlagen-Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Visualisierung historische Temperaturdaten</title>
+  <!-- Chart.js von CDN laden -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
-    body { font-family: sans-serif; padding: 20px; }
-    canvas { max-width: 100%; height: 400px; }
+    body {
+      font-family: Arial, sans-serif;
+      padding: 1rem;
+      background-color: #f0f0f0;
+    }
+    h1 {
+      margin-bottom: 1rem;
+    }
+    select {
+      margin-bottom: 1rem;
+      padding: 0.5rem;
+    }
+    canvas {
+      background: white;
+      border: 1px solid #ccc;
+      max-width: 100%;
+      height: auto;
+    }
   </style>
 </head>
 <body>
-  <h1>Live & Historische Datenvisualisierung</h1>
+  <h1>Visualisierung historische Temperaturdaten</h1>
 
-  <label>Anlage (ident): <input id="ident" value="Solos"></label>
-  <button onclick="loadHistorical()">Historische Daten laden</button>
+  <label for="identSelect">Anlage auswählen:</label>
+  <select id="identSelect"></select>
 
-  <h2>Live-Daten (TF1)</h2>
-  <canvas id="liveChart"></canvas>
+  <canvas id="tempChart"></canvas>
 
-  <h2>Verlauf letzte 24h (TF1 Mittelwert)</h2>
-  <canvas id="historyChart"></canvas>
-
-  <script>
-    const liveCtx = document.getElementById('liveChart').getContext('2d');
-    const liveChart = new Chart(liveCtx, {
-      type: 'line', data: { labels: [], datasets: [{ label: 'TF1', data: [], borderColor: 'green' }] },
-      options: { animation: false, responsive: true }
-    });
-
-    const historyCtx = document.getElementById('historyChart').getContext('2d');
-    const historyChart = new Chart(historyCtx, {
-      type: 'line', data: { labels: [], datasets: [{ label: 'TF1 Mittelwert', data: [], borderColor: 'blue' }] },
-      options: { responsive: true }
-    });
-
-    // === LIVE: alle 2 Sek via Flespi REST API ===
-    setInterval(() => {
-      const ident = document.getElementById('ident').value;
-      fetch(`https://flespi.io/gw/devices/messages?topic_contains=${ident}&limit=1`, {
-        headers: { 'Authorization': 'FlespiToken 9KrYqIGZhixeaUSnSxcsztHfPNB6tHfjQJfvMGtKvHOdiBTUeCWDLfMNhwEVgwGG' }
-      })
-      .then(res => res.json())
-      .then(res => {
-        if (!res.result || !res.result[0]) return;
-        const msg = res.result[0].payload;
-        const val = msg.TF1 || 0;
-        const ts = new Date().toLocaleTimeString();
-        liveChart.data.labels.push(ts);
-        liveChart.data.datasets[0].data.push(val);
-        if (liveChart.data.labels.length > 30) {
-          liveChart.data.labels.shift();
-          liveChart.data.datasets[0].data.shift();
-        }
-        liveChart.update();
-      });
-    }, 2000);
-
-    // === HISTORISCH: Abruf via AWS API ===
-    function loadHistorical() {
-      const ident = document.getElementById('ident').value;
-      const today = new Date().toISOString().split('T')[0];
-      const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
-
-      fetch(`https://dashboard-bioreactor.netlify.app/.netlify/functions/data?ident=${ident}&from=${yesterday}&to=${today}`)
-        .then(res => res.json())
-        .then(data => {
-          const timestamps = data.map(e => e.minute);
-          const tf1s = data.map(e => e.TF1);
-          historyChart.data.labels = timestamps;
-          historyChart.data.datasets[0].data = tf1s;
-          historyChart.update();
-        });
-    }
-  </script>
+  <!-- unser eigenes Script -->
+  <script src="chart.js"></script>
 </body>
 </html>
