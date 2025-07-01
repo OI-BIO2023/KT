@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Visualisierung historische Temperaturdaten</title>
-  <!-- Chart.js von CDN laden -->
+  <!-- Chart.js CDN -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     body {
@@ -12,30 +12,60 @@
       padding: 1rem;
       background-color: #f0f0f0;
     }
-    h1 {
-      margin-bottom: 1rem;
+    h1, h2 {
+      margin-top: 1rem;
     }
-    select {
-      margin-bottom: 1rem;
+    select, input, button {
+      margin: 0.5rem 0.5rem 1rem 0;
       padding: 0.5rem;
     }
     canvas {
       background: white;
       border: 1px solid #ccc;
       max-width: 100%;
-      height: auto;
+      height: 400px;
+    }
+    .checkbox-group {
+      margin-bottom: 1rem;
+      background: #fff;
+      padding: 0.5rem;
+      border: 1px solid #ddd;
     }
   </style>
 </head>
 <body>
   <h1>Visualisierung historische Temperaturdaten</h1>
 
+  <!-- Anlage Auswahl -->
   <label for="identSelect">Anlage auswählen:</label>
   <select id="identSelect"></select>
 
-  <canvas id="tempChart"></canvas>
+  <!-- Zeitfilter -->
+  <div>
+    <label for="startDateTime">Startzeit:</label>
+    <input type="datetime-local" id="startDateTime">
 
-  <!-- unser eigenes Script -->
+    <label for="endDateTime">Endzeit:</label>
+    <input type="datetime-local" id="endDateTime">
+
+    <button id="filterButton">Filtern</button>
+  </div>
+
+  <!-- Reactor -->
+  <h2>Reactor</h2>
+  <div id="reactorCheckboxes" class="checkbox-group"></div>
+  <canvas id="reactorChart"></canvas>
+
+  <!-- Biomass -->
+  <h2>Biomass</h2>
+  <div id="biomassCheckboxes" class="checkbox-group"></div>
+  <canvas id="biomassChart"></canvas>
+
+  <!-- User -->
+  <h2>User</h2>
+  <div id="userCheckboxes" class="checkbox-group"></div>
+  <canvas id="userChart"></canvas>
+
   <script src="chart.js"></script>
 </body>
 </html>
