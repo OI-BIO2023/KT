@@ -1,8 +1,7 @@
-// ident aus URL-Parameter holen
-const urlParams = new URLSearchParams(window.location.search);
-const ident = urlParams.get("ident") || "Solos";
+// immer ident Solos
+const ident = "Solos";
 
-// MQTT-Verbindung aufbauen
+// MQTT-Verbindung über WebSocket
 const client = mqtt.connect('wss://mqtt.flespi.io:443', {
   username: 'FlespiToken 9KrYqIGZhixeaUSnSxcsztHfPNB6tHfjQJfvMGtKvHOdiBTUeCWDLfMNhwEVgwGG'
 });
@@ -10,24 +9,21 @@ const client = mqtt.connect('wss://mqtt.flespi.io:443', {
 client.on('connect', () => {
   console.log("MQTT verbunden");
 
-  // Topic abonnieren für den gewählten ident
-  const topic = `bioreactor/${ident}/+`;
-  console.log(`Abonniere Topic: ${topic}`);
-  client.subscribe(topic);
+  // nur Topic "event" abonnieren
+  client.subscribe("event");
 });
 
 client.on('message', (topic, message) => {
   try {
     const data = JSON.parse(message.toString());
-    console.log("Eingehende Nachricht", topic, data);
+    console.log("Eingehend", topic, data);
 
-    // Prüfe ident
     if (data.ident !== ident) {
       console.log(`Ignoriere andere Anlage: ${data.ident}`);
       return;
     }
 
-    // Beispiel: Sensoren
+    // Beispiel: T1 und T2 aus JSON
     if (data.sensor === "T1") {
       document.getElementById("tempT1").innerHTML = `T1: ${data.value} °C`;
     }
