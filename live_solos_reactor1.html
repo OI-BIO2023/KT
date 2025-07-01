@@ -5,16 +5,18 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Echtzeit Solos Reaktor 1</title>
   <style>
-    body { margin: 0; }
+    body { margin: 0; background: #f0f0f0; }
     #schema-container {
       position: relative;
       width: 100%;
-      height: auto;
-    }
-    #schema-container img {
-      width: 100%;
-      height: auto;
-      display: block;
+      max-width: 1200px;
+      margin: auto;
+      aspect-ratio: 16/9;
+      background-image: url("images/Solos_Reactor1.jpg");
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: center;
+      border: 1px solid #ccc;
     }
     .value-overlay {
       position: absolute;
@@ -24,19 +26,25 @@
       font-family: Arial, sans-serif;
       font-size: 14px;
     }
+    a {
+      display: block;
+      margin: 1rem auto;
+      width: fit-content;
+      text-decoration: none;
+      color: blue;
+      font-weight: bold;
+    }
   </style>
   <!-- mqtt.js CDN -->
   <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
 </head>
 <body>
   <div id="schema-container">
-    <img src="images/Solos_Reactor1.jpg" alt="Schema" />
     <div id="tempT1" class="value-overlay" style="top: 15%; left: 40%;">T1: -- °C</div>
     <div id="tempT2" class="value-overlay" style="top: 32%; left: 55%;">T2: -- °C</div>
   </div>
 
-
-  <p><a href="index.html">🔙 Zurück zur Hauptseite</a></p>
+  <a href="index.html">🔙 Zurück zur Hauptseite</a>
   
   <script src="live_solos_reactor1.js"></script>
 </body>
