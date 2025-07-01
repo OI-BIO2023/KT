@@ -13,25 +13,62 @@
       font-family: Arial, sans-serif;
       padding: 1rem;
       background-color: #f0f0f0;
+      font-size: clamp(12px, 2vw, 16px);
     }
     h1, h2 {
       margin-top: 1rem;
+      font-size: clamp(16px, 3vw, 22px);
+    }
+    label, select, input, button {
+      font-size: clamp(12px, 2vw, 14px);
     }
     select, input, button {
       margin: 0.5rem 0.5rem 1rem 0;
       padding: 0.5rem;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+    }
+    button {
+      background-color: #007acc;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #005fa3;
     }
     canvas {
       background: white;
       border: 1px solid #ccc;
       max-width: 100%;
-      height: 400px;
+      height: auto;
+      aspect-ratio: 16/9;
     }
     .checkbox-group {
       margin-bottom: 1rem;
       background: #fff;
       padding: 0.5rem;
       border: 1px solid #ddd;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      font-size: clamp(10px, 1.5vw, 14px);
+    }
+    a {
+      color: blue;
+      font-weight: bold;
+      text-decoration: none;
+    }
+    a:hover {
+      text-decoration: underline;
+    }
+    @media (max-width: 600px) {
+      h1 {
+        font-size: 18px;
+      }
+      .checkbox-group {
+        flex-direction: column;
+      }
     }
   </style>
 </head>
@@ -42,7 +79,7 @@
   <label for="identSelect">Anlage auswählen:</label>
   <select id="identSelect"></select>
 
-  <p><a href="live_solos_reactor1.html">Zu den Echtzeit-Daten</a></p>
+  <p><a href="live_solos_reactor1.html">👉 Zu den Echtzeit-Daten</a></p>
 
   <!-- Zeitfilter -->
   <div>
