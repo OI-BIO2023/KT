@@ -9,7 +9,11 @@ async function init() {
   const data = await fetchData();
 
   // Alle verschiedenen idents (Anlagen)
-  const idents = [...new Set(data.map((item) => item.ident))];
+  const idents = [...new Set(
+    data
+      .filter((item) => item.ident && item.ident !== "")
+      .map((item) => item.ident)
+  )];
 
   const identSelect = document.getElementById("identSelect");
   idents.forEach((ident) => {
