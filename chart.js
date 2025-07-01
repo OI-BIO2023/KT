@@ -17,32 +17,20 @@ const userSensors = [
 ];
 
 async function fetchData(start, end, ident) {
-  const res = await fetch(`/.netlify/functions/data?ident=${ident}&start=${start}&end=${end}`);
+  const url = `/.netlify/functions/data?ident=${ident}&start=${start}&end=${end}`;
+  console.log("Daten abrufen von", url);
+  const res = await fetch(url);
   return res.json();
 }
 
 async function init() {
-  allData = await fetchData(
-    document.getElementById("startDateTime").value,
-    document.getElementById("endDateTime").value,
-    document.getElementById("identSelect").value || "Solos"
-  );
-
-  const idents = [...new Set(
-    allData
-      .filter((item) => item.ident && item.ident !== "")
-      .map((item) => item.ident)
-  )];
-
-  // Standardwerte für den Zeitfilter setzen (letzte 24h, gerundet auf 5 Minuten)
-  const end = new Date();
-  const start = new Date();
-  start.setHours(end.getHours() - 24);
-
-  document.getElementById("endDateTime").value = formatDateTimeLocal(end);
-  document.getElementById("startDateTime").value = formatDateTimeLocal(start);
-
   const identSelect = document.getElementById("identSelect");
+
+  // einmal alle Daten (nur idents) laden für das Dropdown
+  const res = await fetch("/.netlify/functions/data?ident=Solos&start=1970-01-01T00:00:00Z&end=2100-01-01T00:00:00Z");
+  allData = await res.json();
+
+  const idents = [...new Set(allData.map((item) => item.ident))];
   idents.forEach((ident) => {
     const option = document.createElement("option");
     option.value = ident;
@@ -50,16 +38,25 @@ async function init() {
     identSelect.appendChild(option);
   });
 
+  // Standard Start/End
+  const end = new Date();
+  const start = new Date();
+  start.setHours(end.getHours() - 24);
+
+  document.getElementById("endDateTime").value = formatDateTimeLocal(end);
+  document.getElementById("startDateTime").value = formatDateTimeLocal(start);
+
   identSelect.addEventListener("change", () => renderCharts());
   document.getElementById("filterButton").addEventListener("click", () => renderCharts());
 
-  // Checkboxen generieren
+  // Checkboxen
   generateCheckboxes("reactorCheckboxes", reactorSensors);
   generateCheckboxes("biomassCheckboxes", biomassSensors);
   generateCheckboxes("userCheckboxes", userSensors);
 
-  renderCharts();
+  await renderCharts();
 }
+
 
 function generateCheckboxes(containerId, sensorList) {
   const container = document.getElementById(containerId);
@@ -77,53 +74,32 @@ function generateCheckboxes(containerId, sensorList) {
   });
 }
 
-function renderCharts() {
+async function renderCharts() {
   const selectedIdent = document.getElementById("identSelect").value;
   const startTime = document.getElementById("startDateTime").value;
   const endTime = document.getElementById("endDateTime").value;
 
-  let filtered = allData.filter(item => item.ident === selectedIdent);
+  // hole nur die gefilterten Daten
+  allData = await fetchData(startTime, endTime, selectedIdent);
 
-  // Zeitfilter
-  if (startTime) {
-    const startDate = new Date(startTime);
-    filtered = filtered.filter(item => new Date(item.minute) >= startDate);
-  }
-  if (endTime) {
-    const endDate = new Date(endTime);
-    filtered = filtered.filter(item => new Date(item.minute) <= endDate);
-  }
+  let filtered = allData;
 
   // REACTOR
   const reactorActiveSensors = getActiveSensors("reactorCheckboxes");
   const reactorDatasets = buildDatasets(filtered, reactorActiveSensors);
-  renderChart(
-    "reactorChart",
-    reactorDatasets,
-    "Reactor Temperaturen",
-    filtered
-  );
+  renderChart("reactorChart", reactorDatasets, "Reactor Temperaturen", filtered);
 
   // BIOMASS
   const biomassActiveSensors = getActiveSensors("biomassCheckboxes");
   const biomassDatasets = buildDatasets(filtered, biomassActiveSensors);
-  renderChart(
-    "biomassChart",
-    biomassDatasets,
-    "Biomass Temperaturen",
-    filtered
-  );
+  renderChart("biomassChart", biomassDatasets, "Biomass Temperaturen", filtered);
 
   // USER
   const userActiveSensors = getActiveSensors("userCheckboxes");
   const userDatasets = buildDatasets(filtered, userActiveSensors);
-  renderChart(
-    "userChart",
-    userDatasets,
-    "User Temperaturen",
-    filtered
-  );
+  renderChart("userChart", userDatasets, "User Temperaturen", filtered);
 }
+
 
 
 function getActiveSensors(containerId) {
