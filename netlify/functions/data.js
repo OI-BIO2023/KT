@@ -24,7 +24,11 @@ export async function handler(event, context) {
 
     return {
       statusCode: 200,
-      body: JSON.stringify(items),
+      body: JSON.stringify({
+        count: items.length,
+        preview: items.slice(0,5), // zeige nur die ersten 5
+        allItems: items,
+      }),
       headers: { "Content-Type": "application/json" },
     };
   } catch (err) {
