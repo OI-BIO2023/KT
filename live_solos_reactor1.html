@@ -20,11 +20,18 @@
     }
     .value-overlay {
       position: absolute;
-      background: rgba(255,255,255,0.8);
+      background: rgba(255,255,255,0.6);
       border: 1px solid black;
       padding: 2px 5px;
       font-family: Arial, sans-serif;
-      font-size: 14px;
+      font-size: 1.8vw;
+    }
+    
+    @media (max-width: 600px) {
+      .value-overlay {
+        font-size: 10px;
+        padding: 1px 3px;
+      }
     }
     a {
       display: block;
