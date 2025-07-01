@@ -25,6 +25,7 @@ client.on('message', (topic, message) => {
 
     // K.T1
     if (data["K.T1"] !== undefined) {
+      console.log("Schreibe in tempT1", data["K.T1"]);
       document.getElementById("tempT1").innerHTML = `T1: ${data["K.T1"].toFixed(1)} °C`;
     }
 
