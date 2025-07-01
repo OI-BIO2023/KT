@@ -21,7 +21,7 @@ client.on('message', (topic, message) => {
 
     // Einfache Temperaturen
     if (data["K.T1"] !== undefined) {
-      document.getElementById("tempT1").innerHTML = `RL Bio: ${data["K.T1"].toFixed(1)}°C`;
+      document.getElementById("tempT1").innerHTML = `VL Bio: ${data["K.T1"].toFixed(1)}°C`;
     }
     if (data["K.T2"] !== undefined) {
       document.getElementById("tempT2").innerHTML = `${data["K.T2"].toFixed(1)}°C`;
@@ -33,7 +33,7 @@ client.on('message', (topic, message) => {
       document.getElementById("tempT5").innerHTML = `Außen: ${data["K.T5"].toFixed(1)}°C`;
     }
     if (data["K.TF1"] !== undefined) {
-      document.getElementById("tempTF1").innerHTML = `VL Bio: ${data["K.TF1"].toFixed(1)}°C`;
+      document.getElementById("tempTF1").innerHTML = `RL Bio: ${data["K.TF1"].toFixed(1)}°C`;
     }
 
     // Biomasse Temperaturen (Mittelwerte)
