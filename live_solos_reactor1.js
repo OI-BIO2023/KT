@@ -9,8 +9,8 @@ const client = mqtt.connect('wss://mqtt.flespi.io:443', {
 client.on('connect', () => {
   console.log("MQTT verbunden");
 
-  // nur Topic "event" abonnieren
-  client.subscribe("event");
+  // nur Topic "value" abonnieren
+  client.subscribe("value");
 });
 
 client.on('message', (topic, message) => {
