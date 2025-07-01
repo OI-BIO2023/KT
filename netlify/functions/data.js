@@ -1,48 +1,40 @@
-const AWS = require('aws-sdk');
+import { DynamoDBClient, ScanCommand } from "@aws-sdk/client-dynamodb";
+import { unmarshall } from "@aws-sdk/util-dynamodb";
 
-// Kein dotenv im Netlify-Environment notwendig
-const dynamo = new AWS.DynamoDB.DocumentClient({
+const client = new DynamoDBClient({
   region: process.env.MY_AWS_REGION,
-  accessKeyId: process.env.MY_AWS_ACCESS_KEY_ID,
-  secretAccessKey: process.env.MY_AWS_SECRET_ACCESS_KEY
+  credentials: {
+    accessKeyId: process.env.MY_AWS_ACCESS_KEY_ID,
+    secretAccessKey: process.env.MY_AWS_SECRET_ACCESS_KEY,
+  },
 });
 
-exports.handler = async (event) => {
-  const { ident, from, to } = event.queryStringParameters || {};
-
-  if (!ident || !from || !to) {
-    return {
-      statusCode: 400,
-      body: JSON.stringify({ error: "Missing ident, from, or to." })
-    };
-  }
-
-  // ISO-Zeiten erzeugen für DynamoDB-Vergleich
-  const fromTs = new Date(`${from}T00:00:00Z`).toISOString();
-  const toTs = new Date(`${to}T23:59:59Z`).toISOString();
-
+export async function handler(event, context) {
   try {
-    const result = await dynamo.query({
-      TableName: process.env.MY_TABLE_NAME || 'MQTT_KT',
-      KeyConditionExpression: "#ident = :ident AND #minute BETWEEN :from AND :to",
-      ExpressionAttributeNames: {
-        "#ident": "ident",
-        "#minute": "minute"
-      },
-      ExpressionAttributeValues: {
-        ":ident": ident,
-        ":from": fromTs,
-        ":to": toTs
-      }
-    }).promise();
+    const params = {
+      TableName: "MQTT_KT", // hier deinen DynamoDB Tabellennamen einsetzen
+      Limit: 1000, // zum Start nicht gleich Millionen abrufen
+    };
+
+    const command = new ScanCommand(params);
+    const data = await client.send(command);
+
+    // DynamoDB liefert Daten als Attribute-Map
+    const items = data.Items.map((item) => unmarshall(item));
 
     return {
       statusCode: 200,
-      headers: { "Access-Control-Allow-Origin": "*" },
-      body: JSON.stringify(result.Items || [])
+      body: JSON.stringify(items),
+      headers: { "Content-Type": "application/json" },
     };
   } catch (err) {
+    console.error(err);
     return {
+      statusCode: 500,
+      body: JSON.stringify({ error: "Fehler beim Abruf aus DynamoDB" }),
+    };
+  }
+}
       statusCode: 500,
       body: JSON.stringify({ error: err.message })
     };
