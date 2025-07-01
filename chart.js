@@ -30,6 +30,15 @@ async function init() {
       .map((item) => item.ident)
   )];
 
+  // Standardwerte für den Zeitfilter setzen (letzte 24h)
+  const end = new Date();
+  const start = new Date();
+  start.setHours(end.getHours() - 24);
+  
+  document.getElementById("endDateTime").value = end.toISOString().slice(0,16);
+  document.getElementById("startDateTime").value = start.toISOString().slice(0,16);
+
+
   const identSelect = document.getElementById("identSelect");
   idents.forEach((ident) => {
     const option = document.createElement("option");
@@ -121,11 +130,17 @@ function renderChart(canvasId, datasets, chartLabel, saveChartCallback) {
   if (window[canvasId + "_instance"]) {
     window[canvasId + "_instance"].destroy();
   }
+
+  // wir nehmen Labels aus den Zeitstempeln
+  const labels = allData
+    .filter(item => item.ident === document.getElementById("identSelect").value)
+    .map(item => item.minute);
+
   const ctx = document.getElementById(canvasId).getContext("2d");
   const chart = new Chart(ctx, {
     type: "line",
     data: {
-      labels: datasets.length > 0 ? datasets[0].data.map((_, i) => datasets[0].data[i]) : [],
+      labels: labels,
       datasets: datasets
     },
     options: {
@@ -138,7 +153,7 @@ function renderChart(canvasId, datasets, chartLabel, saveChartCallback) {
         x: {
           type: "time",
           time: {
-            parser: "yyyy-MM-ddTHH:mm:ssZ",
+            parser: "yyyy-MM-dd'T'HH:mm:ss'Z'",
             tooltipFormat: "yyyy-MM-dd HH:mm",
             unit: "hour"
           },
@@ -153,6 +168,7 @@ function renderChart(canvasId, datasets, chartLabel, saveChartCallback) {
   window[canvasId + "_instance"] = chart;
   saveChartCallback(chart);
 }
+
 
 // einfache Farbzuweisung
 function randomColor(seed) {
