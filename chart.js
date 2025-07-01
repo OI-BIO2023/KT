@@ -30,7 +30,7 @@ async function init() {
       .map((item) => item.ident)
   )];
 
-  // Standardwerte für den Zeitfilter setzen (letzte 24h, im 5-min-Raster)
+  // Standardwerte für den Zeitfilter setzen (letzte 24h, gerundet auf 5 Minuten)
   const end = new Date();
   const start = new Date();
   start.setHours(end.getHours() - 24);
@@ -80,7 +80,6 @@ function renderCharts() {
 
   let filtered = allData.filter(item => item.ident === selectedIdent);
 
-  // Zeitfilter
   if (startTime) {
     filtered = filtered.filter(item => new Date(item.minute) >= new Date(startTime));
   }
@@ -91,17 +90,17 @@ function renderCharts() {
   // REACTOR
   const reactorActiveSensors = getActiveSensors("reactorCheckboxes");
   const reactorDatasets = buildDatasets(filtered, reactorActiveSensors);
-  renderChart("reactorChart", reactorDatasets, "Reactor Temperaturen", reactorChart => reactorChart = reactorChart, filtered);
+  renderChart("reactorChart", reactorDatasets, "Reactor Temperaturen", filtered);
 
   // BIOMASS
   const biomassActiveSensors = getActiveSensors("biomassCheckboxes");
   const biomassDatasets = buildDatasets(filtered, biomassActiveSensors);
-  renderChart("biomassChart", biomassDatasets, "Biomass Temperaturen", biomassChart => biomassChart = biomassChart, filtered);
+  renderChart("biomassChart", biomassDatasets, "Biomass Temperaturen", filtered);
 
   // USER
   const userActiveSensors = getActiveSensors("userCheckboxes");
   const userDatasets = buildDatasets(filtered, userActiveSensors);
-  renderChart("userChart", userDatasets, "User Temperaturen", userChart => userChart = userChart, filtered);
+  renderChart("userChart", userDatasets, "User Temperaturen", filtered);
 }
 
 function getActiveSensors(containerId) {
@@ -128,8 +127,7 @@ function buildDatasets(data, sensors) {
   });
 }
 
-
-function renderChart(canvasId, datasets, chartLabel, saveChartCallback, filteredData) {
+function renderChart(canvasId, datasets, chartLabel, filteredData) {
   if (window[canvasId + "_instance"]) {
     window[canvasId + "_instance"].destroy();
   }
@@ -138,7 +136,6 @@ function renderChart(canvasId, datasets, chartLabel, saveChartCallback, filtered
   const chart = new Chart(ctx, {
     type: "line",
     data: {
-      labels: labels,
       datasets: datasets
     },
     options: {
@@ -151,8 +148,11 @@ function renderChart(canvasId, datasets, chartLabel, saveChartCallback, filtered
         x: {
           type: "time",
           time: {
-            parser: "yyyy-MM-dd'T'HH:mm:ss'Z'",
             tooltipFormat: "yyyy-MM-dd HH:mm",
+            displayFormats: {
+              minute: "HH:mm",
+              hour: "dd.MM HH:mm"
+            },
             unit: "minute",
             stepSize: 5
           },
@@ -165,15 +165,14 @@ function renderChart(canvasId, datasets, chartLabel, saveChartCallback, filtered
     }
   });
   window[canvasId + "_instance"] = chart;
-  saveChartCallback(chart);
 }
 
-// 5-Minuten-Raster Zeitformatierung
+// Hilfsfunktion für gerundetes Datum im 5-Minuten-Raster
 function formatDateTimeLocal(date) {
   date.setMilliseconds(0);
   date.setSeconds(0);
   const minutes = date.getMinutes();
-  date.setMinutes(minutes - (minutes % 5)); // auf 5 Minuten runden
+  date.setMinutes(minutes - (minutes % 5));
   return date.toISOString().slice(0,16);
 }
 
