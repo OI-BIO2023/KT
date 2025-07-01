@@ -113,7 +113,10 @@ function getActiveSensors(containerId) {
 
 function buildDatasets(data, sensors) {
   return sensors.map(sensor => {
-    const values = data.map(item => Number(item[sensor] || 0));
+    const values = data.map(item => ({
+      x: item.minute,
+      y: Number(item[sensor] || 0)
+    }));
     return {
       label: sensor,
       data: values,
@@ -125,12 +128,15 @@ function buildDatasets(data, sensors) {
   });
 }
 
+
 function renderChart(canvasId, datasets, chartLabel, saveChartCallback, filteredData) {
   if (window[canvasId + "_instance"]) {
     window[canvasId + "_instance"].destroy();
   }
 
-  const labels = filteredData.map(item => item.minute);
+  data: {
+    datasets: datasets
+  }
 
   const ctx = document.getElementById(canvasId).getContext("2d");
   const chart = new Chart(ctx, {
