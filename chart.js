@@ -30,14 +30,13 @@ async function init() {
       .map((item) => item.ident)
   )];
 
-  // Standardwerte für den Zeitfilter setzen (letzte 24h)
+  // Standardwerte für den Zeitfilter setzen (letzte 24h, im 5-min-Raster)
   const end = new Date();
   const start = new Date();
   start.setHours(end.getHours() - 24);
-  
-  document.getElementById("endDateTime").value = end.toISOString().slice(0,16);
-  document.getElementById("startDateTime").value = start.toISOString().slice(0,16);
 
+  document.getElementById("endDateTime").value = formatDateTimeLocal(end);
+  document.getElementById("startDateTime").value = formatDateTimeLocal(start);
 
   const identSelect = document.getElementById("identSelect");
   idents.forEach((ident) => {
@@ -60,6 +59,7 @@ async function init() {
 
 function generateCheckboxes(containerId, sensorList) {
   const container = document.getElementById(containerId);
+  container.innerHTML = ""; // leeren, falls mehrfach gerendert
   sensorList.forEach(sensor => {
     const label = document.createElement("label");
     const checkbox = document.createElement("input");
@@ -91,17 +91,17 @@ function renderCharts() {
   // REACTOR
   const reactorActiveSensors = getActiveSensors("reactorCheckboxes");
   const reactorDatasets = buildDatasets(filtered, reactorActiveSensors);
-  renderChart("reactorChart", reactorDatasets, "Reactor Temperaturen", reactorChart => reactorChart = reactorChart);
+  renderChart("reactorChart", reactorDatasets, "Reactor Temperaturen", reactorChart => reactorChart = reactorChart, filtered);
 
   // BIOMASS
   const biomassActiveSensors = getActiveSensors("biomassCheckboxes");
   const biomassDatasets = buildDatasets(filtered, biomassActiveSensors);
-  renderChart("biomassChart", biomassDatasets, "Biomass Temperaturen", biomassChart => biomassChart = biomassChart);
+  renderChart("biomassChart", biomassDatasets, "Biomass Temperaturen", biomassChart => biomassChart = biomassChart, filtered);
 
   // USER
   const userActiveSensors = getActiveSensors("userCheckboxes");
   const userDatasets = buildDatasets(filtered, userActiveSensors);
-  renderChart("userChart", userDatasets, "User Temperaturen", userChart => userChart = userChart);
+  renderChart("userChart", userDatasets, "User Temperaturen", userChart => userChart = userChart, filtered);
 }
 
 function getActiveSensors(containerId) {
@@ -114,7 +114,6 @@ function getActiveSensors(containerId) {
 function buildDatasets(data, sensors) {
   return sensors.map(sensor => {
     const values = data.map(item => Number(item[sensor] || 0));
-    const labels = data.map(item => item.minute);
     return {
       label: sensor,
       data: values,
@@ -126,15 +125,12 @@ function buildDatasets(data, sensors) {
   });
 }
 
-function renderChart(canvasId, datasets, chartLabel, saveChartCallback) {
+function renderChart(canvasId, datasets, chartLabel, saveChartCallback, filteredData) {
   if (window[canvasId + "_instance"]) {
     window[canvasId + "_instance"].destroy();
   }
 
-  // wir nehmen Labels aus den Zeitstempeln
-  const labels = allData
-    .filter(item => item.ident === document.getElementById("identSelect").value)
-    .map(item => item.minute);
+  const labels = filteredData.map(item => item.minute);
 
   const ctx = document.getElementById(canvasId).getContext("2d");
   const chart = new Chart(ctx, {
@@ -155,7 +151,8 @@ function renderChart(canvasId, datasets, chartLabel, saveChartCallback) {
           time: {
             parser: "yyyy-MM-dd'T'HH:mm:ss'Z'",
             tooltipFormat: "yyyy-MM-dd HH:mm",
-            unit: "hour"
+            unit: "minute",
+            stepSize: 5
           },
           title: { display: true, text: "Zeit" }
         },
@@ -169,6 +166,14 @@ function renderChart(canvasId, datasets, chartLabel, saveChartCallback) {
   saveChartCallback(chart);
 }
 
+// 5-Minuten-Raster Zeitformatierung
+function formatDateTimeLocal(date) {
+  date.setMilliseconds(0);
+  date.setSeconds(0);
+  const minutes = date.getMinutes();
+  date.setMinutes(minutes - (minutes % 5)); // auf 5 Minuten runden
+  return date.toISOString().slice(0,16);
+}
 
 // einfache Farbzuweisung
 function randomColor(seed) {
