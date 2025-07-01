@@ -134,10 +134,6 @@ function renderChart(canvasId, datasets, chartLabel, saveChartCallback, filtered
     window[canvasId + "_instance"].destroy();
   }
 
-  data: {
-    datasets: datasets
-  }
-
   const ctx = document.getElementById(canvasId).getContext("2d");
   const chart = new Chart(ctx, {
     type: "line",
