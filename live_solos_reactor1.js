@@ -24,10 +24,10 @@ client.on('message', (topic, message) => {
     }
 
     // Beispiel: T1 und T2 aus JSON
-    if (data.sensor === "T1") {
+    if (data.sensor === "K.T1") {
       document.getElementById("tempT1").innerHTML = `T1: ${data.value} °C`;
     }
-    if (data.sensor === "T2") {
+    if (data.sensor === "K.T2") {
       document.getElementById("tempT2").innerHTML = `T2: ${data.value} °C`;
     }
 
