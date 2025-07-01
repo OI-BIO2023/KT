@@ -1,7 +1,7 @@
-// immer ident Solos
+// ident fix Solos
 const ident = "Solos";
 
-// MQTT-Verbindung über WebSocket
+// MQTT WebSocket
 const client = mqtt.connect('wss://mqtt.flespi.io:443', {
   username: 'FlespiToken 9KrYqIGZhixeaUSnSxcsztHfPNB6tHfjQJfvMGtKvHOdiBTUeCWDLfMNhwEVgwGG'
 });
@@ -9,8 +9,8 @@ const client = mqtt.connect('wss://mqtt.flespi.io:443', {
 client.on('connect', () => {
   console.log("MQTT verbunden");
 
-  // nur Topic "value" abonnieren
-  client.subscribe("value");
+  // nur Topic event abonnieren
+  client.subscribe("event");
 });
 
 client.on('message', (topic, message) => {
@@ -23,12 +23,14 @@ client.on('message', (topic, message) => {
       return;
     }
 
-    // Beispiel: T1 und T2 aus JSON
-    if (data.sensor === "K.T1") {
-      document.getElementById("tempT1").innerHTML = `K.T1: ${data.value} °C`;
+    // K.T1
+    if (data["K.T1"] !== undefined) {
+      document.getElementById("tempT1").innerHTML = `T1: ${data["K.T1"].toFixed(1)} °C`;
     }
-    if (data.sensor === "K.T2") {
-      document.getElementById("tempT2").innerHTML = `K.T2: ${data.value} °C`;
+
+    // K.T2
+    if (data["K.T2"] !== undefined) {
+      document.getElementById("tempT2").innerHTML = `T2: ${data["K.T2"].toFixed(1)} °C`;
     }
 
   } catch (err) {
