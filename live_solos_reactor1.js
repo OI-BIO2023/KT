@@ -30,7 +30,7 @@ client.on('message', (topic, message) => {
       document.getElementById("tempT3").innerHTML = `${data["K.T3"].toFixed(1)}°C`;
     }
     if (data["K.T5"] !== undefined) {
-      document.getElementById("tempT5").innerHTML = `Umgebung: ${data["K.T5"].toFixed(1)}°C`;
+      document.getElementById("tempT5").innerHTML = `Außen: ${data["K.T5"].toFixed(1)}°C`;
     }
     if (data["K.TF1"] !== undefined) {
       document.getElementById("tempTF1").innerHTML = `VL Bio: ${data["K.TF1"].toFixed(1)}°C`;
