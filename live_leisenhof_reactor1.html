@@ -8,12 +8,12 @@
     :root {
       --ink: #e6eefc;
       --muted: #aab9d7;
-      --hotel: #d4af37;
+      --hotel: #e0b321;
       --air: #1e3a8a;
       --pool: #3b82f6;
-      --r1: #7a2f1b;
-      --r2: #7a2f1b;
-      --wp: #1fbf3d;
+      --r1: #a3291b;
+      --r2: #a3291b;
+      --wp: #5f7f2a;
       --card: rgba(10, 15, 28, 0.42);
       --border: rgba(255, 255, 255, 0.2);
       --temp-border: #d62828;
@@ -180,7 +180,7 @@
     }
 
     .pair .temp { margin-right: -11px; }
-    .pool-pair { transform: translateY(11px); }
+    .pool-pair { transform: translateY(16px); }
     .temp .line { gap: 0.14rem; }
 
     .temp .name,
@@ -271,7 +271,6 @@
       <h1>Leisenhof Live Monitoring</h1>
       <div class="head-right">
         <div class="meta">
-          <span>Status: <strong id="connState">warte auf API...</strong></span>
           <span>Letztes Update: <strong id="lastSeen">-</strong></span>
         </div>
         <div class="link-row"><a href="index.html">Historie</a></div>
@@ -287,7 +286,7 @@
           <path id="path_r1_wp" class="guide-path" d="M58,35 C54,26 49,24 42,27"></path>
           <path id="path_r2_wp" class="guide-path" d="M77,27 C67,19 58,20 42,27"></path>
           <path id="path_wp_hotel" class="guide-path" d="M28,27 C23,18 21,17 20,16"></path>
-          <path id="path_wp_pool" class="guide-path" d="M28,37 C26,42 23,45 20,44"></path>
+          <path id="path_wp_pool" class="guide-path" d="M28,37 C26,44 23,48 20,49"></path>
         </defs>
 
         <g id="arrows-air"></g>
@@ -349,11 +348,11 @@
     (function () {
       const ns = "http://www.w3.org/2000/svg";
       const specs = [
-        { path: "path_air_wp", container: "arrows-air", cls: "p-air" },
-        { path: "path_r1_wp", container: "arrows-r1", cls: "p-r1" },
-        { path: "path_r2_wp", container: "arrows-r2", cls: "p-r2" },
-        { path: "path_wp_hotel", container: "arrows-hotel", cls: "p-hotel" },
-        { path: "path_wp_pool", container: "arrows-pool", cls: "p-pool" },
+        { path: "path_air_wp", container: "arrows-air", cls: "p-air", spacingFactor: 1, speedFactor: 1 },
+        { path: "path_r1_wp", container: "arrows-r1", cls: "p-r1", spacingFactor: 1, speedFactor: 1 },
+        { path: "path_r2_wp", container: "arrows-r2", cls: "p-r2", spacingFactor: 1, speedFactor: 1 },
+        { path: "path_wp_hotel", container: "arrows-hotel", cls: "p-hotel", spacingFactor: 1.45, speedFactor: 1.45 },
+        { path: "path_wp_pool", container: "arrows-pool", cls: "p-pool", spacingFactor: 1.45, speedFactor: 1.45 },
       ];
 
       const refPath = document.getElementById("path_air_wp");
@@ -370,8 +369,8 @@
         if (!path || !container) continue;
 
         const len = path.getTotalLength() || 1;
-        const count = Math.max(4, Math.round(len / spacingDist));
-        const dur = refDur * (len / refLen);
+        const count = Math.max(3, Math.round(len / (spacingDist * spec.spacingFactor)));
+        const dur = refDur * (len / refLen) * spec.speedFactor;
         const step = dur / count;
 
         for (let i = 0; i < count; i += 1) {
