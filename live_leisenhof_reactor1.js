@@ -12,7 +12,6 @@ function bootstrap() {
 async function refresh() {
   try {
     const latest = await fetchLatestValueRecord();
-
     if (!latest) {
       setText("connState", "keine Daten gefunden");
       return;
@@ -21,6 +20,7 @@ async function refresh() {
     render(latest);
     setText("connState", "verbunden");
     setText("lastSeen", new Date().toLocaleString("de-DE"));
+    setText("tsValue", String(latest.ts || "-"));
   } catch (err) {
     setText("connState", "api-fehler");
     console.error("Live refresh failed", err);
@@ -56,37 +56,27 @@ function render(data) {
   const pWpHeat = sum(data, ["P_heat_1", "P_heat_2"]);
   const pR1 = sum(data, ["P_lat_A", "P_sen_B", "P_lat_C", "P_sen_D"]);
   const pR2 = sum(data, ["P_lat_A_R2", "P_lat_C_R2", "P_sen_B_R2", "P_sen_D_R2"]);
-  const cop = avgPositive([data.COP_1, data.COP_2]);
-  const eer = avgPositive([data.EER_1, data.EER_2]);
+  const pL = pWpHeat + pWpCool - pR1 - pR2;
 
-  setText("identValue", String(data.ident || IDENT));
-  setText("topicValue", String(data.type || "value"));
-  setText("tsValue", String(data.ts || "-"));
+  setMetric("technikPWpEl", pWpEl, "kW");
+  setMetric("technikPWpHeat", pWpHeat, "kW");
+  setMetric("technikPWpCool", pWpCool, "kW");
+  setMetric("r1Power", pR1, "kW");
+  setMetric("r2Power", pR2, "kW");
+  setMetric("r1Temp", data.T_max_BIO, "degC");
+  setMetric("r2Temp", data.T_max_BIO_R2, "degC");
+  setMetric("hotelPHeat", data.P_Heat, "kW");
+  setMetric("hotelTVlHeat", data.T_VL_heating, "degC");
+  setMetric("poolPower", data.P_Pool, "kW");
+  setMetric("poolTemp", data.T_VL_Pool, "degC");
+  setMetric("airPower", pL, "kW");
 
-  setMetric("P_Heat", data.P_Heat, "kW");
-  setMetric("P_Pool", data.P_Pool, "kW");
-  setMetric("P_WP_cool", pWpCool, "kW");
-  setMetric("P_WP_el", pWpEl, "kW");
-  setMetric("P_WP_heat", pWpHeat, "kW");
-  setMetric("P_R1", pR1, "kW");
-  setMetric("P_R2", pR2, "kW");
-  setMetric("COP", cop, "");
-  setMetric("EER", eer, "");
-  setMetric("T_2000l_top", data.T_2000l_top, "degC");
-  setMetric("T_VL_pool", data.T_VL_Pool, "degC");
-  setMetric("T_VL_heating", data.T_VL_heating, "degC");
-  setMetric("T_max_BIO", data.T_max_BIO, "degC");
-  setMetric("T_max_BIO_R2", data.T_max_BIO_R2, "degC");
+  toggle("technikHeatRow", pWpHeat > 0);
+  toggle("technikCoolRow", pWpCool > 0);
 }
 
 function sum(obj, keys) {
   return keys.reduce((acc, key) => acc + toNumber(obj[key]), 0);
-}
-
-function avgPositive(values) {
-  const positive = values.map(toNumber).filter((v) => v > 0);
-  if (!positive.length) return null;
-  return positive.reduce((a, b) => a + b, 0) / positive.length;
 }
 
 function toNumber(value) {
@@ -107,4 +97,11 @@ function setMetric(id, value, unit) {
 function setText(id, value) {
   const el = document.getElementById(id);
   if (el) el.textContent = value;
+}
+
+function toggle(id, visible) {
+  const el = document.getElementById(id);
+  if (el) {
+    el.classList.toggle("hidden", !visible);
+  }
 }

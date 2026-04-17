@@ -10,6 +10,7 @@ const client = new DynamoDBClient({
 });
 
 const TABLE_NAME = process.env.MY_DDB_TABLE || "MQTT_KT";
+const WP_SCALE_DIVISOR = Number(process.env.MY_WP_DIVISOR || "10");
 
 exports.handler = async function (event) {
   try {
@@ -84,7 +85,7 @@ function parseIso(value, fallbackDate) {
 }
 
 function flattenRecord(item) {
-  const payload = normalizePayload(item.payload);
+  const payload = applyWpScaling(normalizePayload(item.payload));
   return {
     ...payload,
     ident: item.ident,
@@ -93,6 +94,19 @@ function flattenRecord(item) {
     pk: item.pk,
     sk: item.sk,
   };
+}
+
+function applyWpScaling(payload) {
+  if (!payload || typeof payload !== "object") return payload;
+  const keys = ["P_heat_1", "P_cool_1", "P_el_1", "P_heat_2", "P_cool_2", "P_el_2"];
+  const out = { ...payload };
+  const divisor = Number.isFinite(WP_SCALE_DIVISOR) && WP_SCALE_DIVISOR > 0 ? WP_SCALE_DIVISOR : 10;
+  keys.forEach((key) => {
+    if (typeof out[key] === "number") {
+      out[key] = out[key] / divisor;
+    }
+  });
+  return out;
 }
 
 function normalizePayload(payload) {
