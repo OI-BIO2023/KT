@@ -10,12 +10,13 @@
       --ink: #e6eefc;
       --muted: #aab9d7;
       --line: #f0f4ff;
-      --hotel: #ec4899;
+      --hotel: #d8c2a3;
       --technik: #f59e0b;
       --r1: #a855f7;
       --r2: #6d28d9;
-      --air: #ef4444;
+      --air: #1e3a8a;
       --pool: #3b82f6;
+      --thermo: #6b8e23;
       --card: rgba(10, 15, 28, 0.82);
       --border: rgba(255, 255, 255, 0.22);
     }
@@ -102,10 +103,10 @@
 
     .flow line {
       stroke: var(--line);
-      stroke-width: 1.1;
+      stroke-width: 0.8;
       stroke-linecap: round;
-      filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.85));
-      opacity: 0.98;
+      filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.55));
+      opacity: 0.56;
     }
 
     .panel {
@@ -114,7 +115,7 @@
       max-width: min(31vw, 230px);
       background: var(--card);
       border: 1px solid var(--border);
-      border-left: 7px solid #ffffff;
+      border-left: 6px solid #ffffff;
       border-radius: 10px;
       padding: 0.45rem 0.55rem 0.5rem;
       backdrop-filter: blur(2px);
@@ -131,33 +132,43 @@
 
     .panel .row {
       display: flex;
-      justify-content: space-between;
+      justify-content: flex-end;
       gap: 0.5rem;
       margin-top: 0.12rem;
       white-space: nowrap;
       color: #f4f8ff;
-    }
-
-    .panel .k {
-      color: #c7d4ef;
+      font-weight: 700;
+      font-size: 1.05em;
     }
 
     .panel.hotel { left: 10%; top: 15%; border-left-color: var(--hotel); }
-    .panel.technik { left: 39%; top: 50%; border-left-color: var(--technik); }
+    .panel.technik { left: 35%; top: 46%; border-left-color: #7f1d1d; }
     .panel.r1 { left: 51%; top: 56%; border-left-color: var(--r1); }
     .panel.r2 { left: 72%; top: 55%; border-left-color: var(--r2); }
-    .panel.air { left: 79%; top: 79%; border-left-color: var(--air); }
+    .panel.air { left: 82%; top: 84%; border-left-color: var(--air); }
     .panel.pool { left: 2%; top: 54%; border-left-color: var(--pool); min-width: 120px; }
 
-    .pool-icon {
-      display: inline-block;
-      width: 14px;
-      height: 14px;
-      border-radius: 50%;
-      background: radial-gradient(circle at 35% 35%, #7dd3fc, #0284c7);
-      margin-right: 0.3rem;
-      vertical-align: -1px;
+    .thermo {
+      position: absolute;
+      background: rgba(19, 28, 13, 0.92);
+      border: 1px solid rgba(183, 213, 140, 0.8);
+      border-left: 6px solid var(--thermo);
+      border-radius: 10px;
+      color: #f4ffe8;
+      padding: 0.34rem 0.5rem;
+      font-size: clamp(10px, 0.76vw, 14px);
+      font-weight: 700;
+      backdrop-filter: blur(2px);
     }
+
+    .thermo .ticon {
+      margin-right: 0.28rem;
+      opacity: 0.95;
+    }
+
+    .thermo.r1t { left: 58%; top: 63%; }
+    .thermo.r2t { left: 79%; top: 62%; }
+    .thermo.hotelt { left: 18%; top: 22%; }
 
     .hidden {
       display: none !important;
@@ -180,14 +191,17 @@
       }
 
       .panel.hotel { left: 6%; top: 9%; }
-      .panel.technik { left: 35%; top: 44%; }
+      .panel.technik { left: 26%; top: 40%; }
       .panel.r1 { left: 59%; top: 50%; }
       .panel.r2 { left: 60%; top: 63%; }
-      .panel.air { left: 58%; top: 82%; }
+      .panel.air { left: 60%; top: 86%; }
       .panel.pool { left: 4%; top: 59%; }
+      .thermo.r1t { left: 62%; top: 57%; }
+      .thermo.r2t { left: 63%; top: 70%; }
+      .thermo.hotelt { left: 22%; top: 17%; }
 
       .flow line {
-        stroke-width: 1.4;
+        stroke-width: 1.1;
       }
     }
   </style>
@@ -212,8 +226,8 @@
 
       <svg class="flow" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
         <defs>
-          <marker id="arrowHead" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
-            <path d="M0,0 L6,3 L0,6 Z" fill="#f0f4ff" />
+          <marker id="arrowHead" markerWidth="5" markerHeight="5" refX="4.6" refY="2.5" orient="auto">
+            <path d="M0,0 L5,2.5 L0,5 Z" fill="#e8eefc" />
           </marker>
         </defs>
         <line x1="86" y1="83" x2="52" y2="52" marker-end="url(#arrowHead)"></line>
@@ -225,38 +239,45 @@
 
       <article class="panel hotel">
         <div class="title">Hotel</div>
-        <div class="row"><span class="k">P_HEAT</span><span id="hotelPHeat">-</span></div>
-        <div class="row"><span class="k">T_VL_HEATING</span><span id="hotelTVlHeat">-</span></div>
+        <div class="row"><span id="hotelPHeat">-</span></div>
       </article>
 
       <article class="panel technik">
         <div class="title">Technikraum</div>
-        <div class="row"><span class="k">P_WP_EL</span><span id="technikPWpEl">-</span></div>
-        <div id="technikHeatRow" class="row"><span class="k">P_WP_HEAT</span><span id="technikPWpHeat">-</span></div>
-        <div id="technikCoolRow" class="row"><span class="k">P_WP_COOL</span><span id="technikPWpCool">-</span></div>
+        <div class="row"><span id="technikPWpEl">-</span></div>
+        <div id="technikHeatRow" class="row"><span id="technikPWpHeat">-</span></div>
+        <div id="technikCoolRow" class="row"><span id="technikPWpCool">-</span></div>
       </article>
 
       <article class="panel r1">
         <div class="title">Reaktor 1</div>
-        <div class="row"><span class="k">P_R1</span><span id="r1Power">-</span></div>
-        <div class="row"><span class="k">T_MAX_BIO</span><span id="r1Temp">-</span></div>
+        <div class="row"><span id="r1Power">-</span></div>
       </article>
 
       <article class="panel r2">
         <div class="title">Reaktor 2</div>
-        <div class="row"><span class="k">P_R2</span><span id="r2Power">-</span></div>
-        <div class="row"><span class="k">T_MAX_BIO_R2</span><span id="r2Temp">-</span></div>
+        <div class="row"><span id="r2Power">-</span></div>
       </article>
 
       <article class="panel air">
-        <div class="title">Luftausseneinheit</div>
-        <div class="row"><span class="k">P_L</span><span id="airPower">-</span></div>
+        <div class="title">Luft</div>
+        <div class="row"><span id="airPower">-</span></div>
       </article>
 
       <article class="panel pool">
-        <div class="title"><span class="pool-icon"></span>Pool</div>
-        <div class="row"><span class="k">P_POOL</span><span id="poolPower">-</span></div>
-        <div class="row"><span class="k">T_VL_POOL</span><span id="poolTemp">-</span></div>
+        <div class="title">Pool</div>
+        <div class="row"><span id="poolPower">-</span></div>
+        <div class="row"><span id="poolTemp">-</span></div>
+      </article>
+
+      <article class="thermo r1t">
+        <span class="ticon">🌡</span><span id="r1Temp">-</span>
+      </article>
+      <article class="thermo r2t">
+        <span class="ticon">🌡</span><span id="r2Temp">-</span>
+      </article>
+      <article class="thermo hotelt">
+        <span class="ticon">🌡</span><span id="hotelTVlHeat">-</span>
       </article>
     </section>
   </main>
