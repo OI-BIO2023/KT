@@ -1,42 +1,38 @@
-const ident = "Solos";
+const ident = "LH";
 
-const client = mqtt.connect('wss://mqtt.flespi.io:443', {
-  username: 'FlespiToken 9KrYqIGZhixeaUSnSxcsztHfPNB6tHfjQJfvMGtKvHOdiBTUeCWDLfMNhwEVgwGG'
+const client = mqtt.connect("wss://mqtt.flespi.io:443", {
+  username: "FlespiToken 9KrYqIGZhixeaUSnSxcsztHfPNB6tHfjQJfvMGtKvHOdiBTUeCWDLfMNhwEVgwGG",
 });
 
-client.on('connect', () => {
+client.on("connect", () => {
   console.log("MQTT verbunden");
   client.subscribe("value");
 });
 
-client.on('message', (topic, message) => {
+client.on("message", (topic, message) => {
   try {
     const data = JSON.parse(message.toString());
-    console.log("Eingehend", topic, data);
-
     if (data.ident !== ident) {
       console.log(`Ignoriere andere Anlage: ${data.ident}`);
       return;
     }
 
-    // Einfache Temperaturen
     if (data["K.T1"] !== undefined) {
-      document.getElementById("tempT1").innerHTML = `VL Bio: ${data["K.T1"].toFixed(1)}°C`;
+      document.getElementById("tempT1").textContent = `VL Bio: ${data["K.T1"].toFixed(1)} °C`;
     }
     if (data["K.T2"] !== undefined) {
-      document.getElementById("tempT2").innerHTML = `${data["K.T2"].toFixed(1)}°C`;
+      document.getElementById("tempT2").textContent = `${data["K.T2"].toFixed(1)} °C`;
     }
     if (data["K.T3"] !== undefined) {
-      document.getElementById("tempT3").innerHTML = `${data["K.T3"].toFixed(1)}°C`;
+      document.getElementById("tempT3").textContent = `${data["K.T3"].toFixed(1)} °C`;
     }
     if (data["K.T5"] !== undefined) {
-      document.getElementById("tempT5").innerHTML = `Außen: ${data["K.T5"].toFixed(1)}°C`;
+      document.getElementById("tempT5").textContent = `Außen: ${data["K.T5"].toFixed(1)} °C`;
     }
     if (data["K.TF1"] !== undefined) {
-      document.getElementById("tempTF1").innerHTML = `RL Bio: ${data["K.TF1"].toFixed(1)}°C`;
+      document.getElementById("tempTF1").textContent = `RL Bio: ${data["K.TF1"].toFixed(1)} °C`;
     }
 
-    // Biomasse Temperaturen (Mittelwerte)
     const kT12 = data["K.T12"] ?? null;
     const kT15 = data["K.T15"] ?? null;
     const kT18 = data["K.T18"] ?? null;
@@ -49,22 +45,21 @@ client.on('message', (topic, message) => {
 
     if (kT12 && kT15 && kT18) {
       const T_low = (kT12 + kT15 + kT18) / 3;
-      document.getElementById("tempBioLow").innerHTML = `${T_low.toFixed(1)}°C`;
+      document.getElementById("tempBioLow").textContent = `${T_low.toFixed(1)} °C`;
     }
     if (kT11 && kT14 && kT17) {
       const T_mid = (kT11 + kT14 + kT17) / 3;
-      document.getElementById("tempBioMid").innerHTML = `${T_mid.toFixed(1)}°C`;
+      document.getElementById("tempBioMid").textContent = `${T_mid.toFixed(1)} °C`;
     }
     if (kT10 && kT13 && kT16) {
       const T_up = (kT10 + kT13 + kT16) / 3;
-      document.getElementById("tempBioUp").innerHTML = `${T_up.toFixed(1)}°C`;
+      document.getElementById("tempBioUp").textContent = `${T_up.toFixed(1)} °C`;
     }
-
   } catch (err) {
     console.error("Fehler beim Parsen", err);
   }
 });
 
-client.on('error', (err) => {
+client.on("error", (err) => {
   console.error("MQTT-Fehler", err);
 });

@@ -2,120 +2,324 @@
 <html lang="de">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Visualisierung historische Temperaturdaten</title>
-  <!-- Chart.js + Luxon -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/luxon@3.4.3/build/global/luxon.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-luxon@1.3.1/dist/chartjs-adapter-luxon.umd.js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Leisenhof Monitoring</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600&display=swap" rel="stylesheet" />
   <style>
+    :root {
+      color-scheme: dark;
+      --bg: #0f172a;
+      --card: #14223c;
+      --border: rgba(255, 255, 255, 0.12);
+      --muted: #94a3b8;
+      --accent: #22d3ee;
+      --accent-2: #a855f7;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
     body {
-      font-family: Arial, sans-serif;
-      padding: 1rem;
-      background-color: #f0f0f0;
-      font-size: clamp(12px, 2vw, 16px);
-    }
-    h1, h2 {
-      margin-top: 1rem;
-      font-size: clamp(16px, 3vw, 22px);
-    }
-    label, select, input, button {
-      font-size: clamp(12px, 2vw, 14px);
-    }
-    select, input, button {
-      margin: 0.5rem 0.5rem 1rem 0;
-      padding: 0.5rem;
-      border-radius: 4px;
-      border: 1px solid #ccc;
-    }
-    button {
-      background-color: #007acc;
+      margin: 0;
+      font-family: "Space Grotesk", system-ui, sans-serif;
+      background: radial-gradient(circle at top right, rgba(34, 211, 238, 0.15), transparent 45%),
+        radial-gradient(circle at 20% 20%, rgba(168, 85, 247, 0.25), transparent 35%),
+        var(--bg);
       color: white;
-      border: none;
-      cursor: pointer;
+      min-height: 100vh;
+      padding: 2rem 1.5rem 3rem;
     }
-    button:hover {
-      background-color: #005fa3;
+
+    .page-header {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
     }
-    .chart-container {
-      overflow-x: auto;
-      border: 1px solid #ccc;
-      background: white;
-      margin-bottom: 1rem;
+
+    .page-header h1 {
+      margin: 0;
+      font-size: clamp(2rem, 4vw, 2.8rem);
+      letter-spacing: 0.05em;
     }
-    canvas {
-      width: 100%
-      height: auto;
+
+    .page-header p {
+      margin: 0.2rem 0 0;
+      color: var(--muted);
     }
-    .checkbox-group {
-      margin-bottom: 1rem;
-      background: #fff;
-      padding: 0.5rem;
-      border: 1px solid #ddd;
+
+    .last-update {
+      text-align: right;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    .controls-panel {
       display: flex;
       flex-wrap: wrap;
-      gap: 0.5rem;
-      font-size: clamp(10px, 1.5vw, 14px);
+      gap: 1rem;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      background: rgba(15, 23, 42, 0.7);
+      padding: 1rem;
+      border-radius: 1rem;
+      border: 1px solid var(--border);
     }
-    a {
-      color: blue;
-      font-weight: bold;
+
+    .control-field {
+      display: flex;
+      flex-direction: column;
+      gap: 0.3rem;
+      font-size: 0.9rem;
+    }
+
+    input[type="datetime-local"] {
+      background: #0f172a;
+      border: 1px solid var(--border);
+      border-radius: 0.6rem;
+      padding: 0.45rem 0.75rem;
+      color: white;
+    }
+
+    .controls-panel button,
+    .controls-panel a {
+      border-radius: 0.6rem;
+      border: none;
+      padding: 0.55rem 1rem;
+      font-weight: 600;
       text-decoration: none;
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
     }
-    a:hover {
-      text-decoration: underline;
+
+    #refreshButton {
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      color: #020617;
+      cursor: pointer;
+      border: none;
     }
+
+    #refreshButton:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 20px rgba(34, 211, 238, 0.35);
+    }
+
+    .live-link {
+      border: 1px solid var(--border);
+      color: white;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1rem;
+    }
+
+    .section {
+      margin-bottom: 1.5rem;
+    }
+
+    .section h2 {
+      margin: 0 0 0.7rem;
+      font-size: 1.25rem;
+    }
+
+    .stat-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 1rem;
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+      min-height: 120px;
+    }
+
+    .stat-card .stat-label {
+      font-size: 0.85rem;
+      color: var(--muted);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .stat-card .stat-value {
+      font-size: 1.9rem;
+      font-weight: 600;
+    }
+
+    .stat-card .stat-meta {
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+
+    .chart-block {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1rem;
+    }
+
+    .chart-card {
+      background: var(--card);
+      border-radius: 1rem;
+      border: 1px solid var(--border);
+      padding: 1rem;
+      min-height: 320px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+    }
+
+    .chart-card canvas {
+      width: 100%;
+      height: 260px;
+    }
+
+    .chart-card h3 {
+      margin: 0 0 0.5rem;
+      font-size: 1.05rem;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    #noDataMessage {
+      color: var(--muted);
+      text-align: center;
+      padding: 1rem 0;
+    }
+
     @media (max-width: 600px) {
-      .checkbox-group {
-        flex-direction: column;
+      body {
+        padding: 1.25rem;
       }
-      canvas {
-        height: 300px;
+
+      .controls-panel {
+        flex-direction: column;
+        align-items: stretch;
       }
     }
   </style>
 </head>
 <body>
-  <h1>Visualisierung historische Temperaturdaten</h1>
+  <header class="page-header">
+    <div>
+      <p>Netlify + AWS | Leisenhof (LH)</p>
+      <h1>Leisenhof Performance</h1>
+      <p>Heatpump telemetry und Pool-/Biomasse-Temperaturen in einem einzigen Blick.</p>
+    </div>
+    <div class="last-update">
+      <div>Letztes Update</div>
+      <div id="lastUpdated">–</div>
+    </div>
+  </header>
 
-  <!-- Anlage Auswahl -->
-  <label for="identSelect">Anlage auswählen:</label>
-  <select id="identSelect"></select>
+  <section class="controls-panel">
+    <div class="control-field">
+      <label for="startDateTime">Startzeit</label>
+      <input type="datetime-local" id="startDateTime" step="300" />
+    </div>
+    <div class="control-field">
+      <label for="endDateTime">Endzeit</label>
+      <input type="datetime-local" id="endDateTime" step="300" />
+    </div>
+    <button id="refreshButton" type="button">Aktualisieren</button>
+    <a class="live-link" href="live_leisenhof_reactor1.html">Live-Daten ansehen</a>
+  </section>
 
-  <p><a href="live_solos_reactor1.html">👉 Zu den Echtzeit-Daten</a></p>
+  <section class="section">
+    <h2>Energie-Highlights</h2>
+    <div class="stats-grid" id="energyStats">
+      <article class="stat-card" id="copCard">
+        <span class="stat-label">durchschn. COP</span>
+        <span class="stat-value" id="copValue">–</span>
+        <span class="stat-meta">Nur bei Heizbetrieb sichtbar</span>
+      </article>
+      <article class="stat-card hidden" id="eerCard">
+        <span class="stat-label">mittlerer EER</span>
+        <span class="stat-value" id="eerValue">–</span>
+        <span class="stat-meta">Nur bei Kühlbetrieb sichtbar</span>
+      </article>
+      <article class="stat-card" id="coolingCard">
+        <span class="stat-label">P_WP_cool</span>
+        <span class="stat-value" id="coolingValue">–</span>
+        <span class="stat-meta">Positiv = aktive Kühlung</span>
+      </article>
+      <article class="stat-card" id="heatCard">
+        <span class="stat-label">P_WP_heat</span>
+        <span class="stat-value" id="heatValue">–</span>
+        <span class="stat-meta">Ausgeblendet bei Kühlung</span>
+      </article>
+      <article class="stat-card" id="electricCard">
+        <span class="stat-label">P_WP_el</span>
+        <span class="stat-value" id="electricValue">–</span>
+        <span class="stat-meta">Wärmepumpen-Grid</span>
+      </article>
+      <article class="stat-card" id="poolCard">
+        <span class="stat-label">P_Pool</span>
+        <span class="stat-value" id="poolValue">–</span>
+        <span class="stat-meta">Poolladeleistung</span>
+      </article>
+      <article class="stat-card" id="r1Card">
+        <span class="stat-label">P_R1</span>
+        <span class="stat-value" id="r1Value">–</span>
+        <span class="stat-meta">Reaktor 1</span>
+      </article>
+      <article class="stat-card" id="r2Card">
+        <span class="stat-label">P_R2</span>
+        <span class="stat-value" id="r2Value">–</span>
+        <span class="stat-meta">Reaktor 2</span>
+      </article>
+    </div>
+  </section>
 
-  <!-- Zeitfilter -->
-  <div>
-    <label for="startDateTime">Startzeit:</label>
-    <input type="datetime-local" id="startDateTime" step="300">
+  <section class="section">
+    <h2>Temperatur-Status</h2>
+    <div class="stats-grid">
+      <article class="stat-card">
+        <span class="stat-label">T_2000l_top</span>
+        <span class="stat-value" id="tTankValue">–</span>
+        <span class="stat-meta">Puffer oben</span>
+      </article>
+      <article class="stat-card">
+        <span class="stat-label">T_VL_pool</span>
+        <span class="stat-value" id="tPoolValue">–</span>
+        <span class="stat-meta">Vorlauf Pool</span>
+      </article>
+      <article class="stat-card">
+        <span class="stat-label">T_VL_heating</span>
+        <span class="stat-value" id="tHeatingValue">–</span>
+        <span class="stat-meta">Vorlauf Heizung</span>
+      </article>
+      <article class="stat-card">
+        <span class="stat-label">T_max_BIO</span>
+        <span class="stat-value" id="tBioValue">–</span>
+        <span class="stat-meta">Biomasse R1</span>
+      </article>
+      <article class="stat-card">
+        <span class="stat-label">T_max_BIO_R2</span>
+        <span class="stat-value" id="tBio2Value">–</span>
+        <span class="stat-meta">Biomasse R2</span>
+      </article>
+    </div>
+  </section>
 
-    <label for="endDateTime">Endzeit:</label>
-    <input type="datetime-local" id="endDateTime" step="300">
+  <section class="chart-block">
+    <div class="chart-card">
+      <h3>Leistungsübersicht</h3>
+      <canvas id="energyChart"></canvas>
+      <p id="noDataMessage" class="hidden">Keine Messwerte im ausgewählten Zeitraum.</p>
+    </div>
+    <div class="chart-card">
+      <h3>Temperaturtrend</h3>
+      <canvas id="tempChart"></canvas>
+    </div>
+  </section>
 
-    <button id="filterButton">Filtern</button>
-  </div>
-
-  <!-- Reactor -->
-  <h2>Reactor</h2>
-  <div id="reactorCheckboxes" class="checkbox-group"></div>
-  <div class="chart-container">
-    <canvas id="reactorChart"></canvas>
-  </div>
-
-  <!-- Biomass -->
-  <h2>Biomass</h2>
-  <div id="biomassCheckboxes" class="checkbox-group"></div>
-  <div class="chart-container">
-    <canvas id="biomassChart"></canvas>
-  </div>
-
-  <!-- User -->
-  <h2>User</h2>
-  <div id="userCheckboxes" class="checkbox-group"></div>
-  <div class="chart-container">
-    <canvas id="userChart"></canvas>
-  </div>
-
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/luxon@3/build/global/luxon.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-luxon@1/dist/chartjs-adapter-luxon.umd.js"></script>
   <script src="chart.js"></script>
 </body>
 </html>

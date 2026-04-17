@@ -1,236 +1,347 @@
-let reactorChart, biomassChart, userChart;
-let allData = [];  // alle geladenen Items
+const IDENT = "LH";
+let energyChart;
+let tempChart;
 
-// Sensor-Gruppen
-const reactorSensors = [
-  "K.T1", "K.T2", "K.T3", "K.T4", "K.T5", "K.T6", "K.T7", "K.T8", "K.T9",
-  "K.TF1", "K.TF4", "K.TF2", "K.TF3", "K.TF7", "K.TF8", "K.TF11", "T1"
-];
-
-const biomassSensors = [
-  "K.T10","K.T11","K.T12","K.T13","K.T14","K.T15","K.T16","K.T17","K.T18",
-  "K.T20","K.T21","K.T22","K.T23","K.T24","K.T25","K.T26","K.T27","K.T28"
-];
-
-const sensorLabels = {
-  "K.T1": "T IN Puffer",
-  "K.T2": "T Puffer oben",
-  "K.T3": "T Puffer unten",
-  "K.T4": "T IN Biomasse R1",
-  "K.T5": "T Außen",
-  "K.T6": "T IN Biomasse R2",
-  "K.T7": "Puffer R2 unten",
-  "K.T8": "Puffer R2 oben",
-  "K.T9": "T OUT R2 zu WT",
-  "K.T10": "T Biomasse R1 Seite A unten",
-  "K.T11": "T Biomasse R1 Seite A mitte",
-  "K.T12": "T Biomasse R1 Seite A oben",
-  "K.T13": "T Biomasse R1 Seite B unten",
-  "K.T14": "T Biomasse R1 Seite B mitte",
-  "K.T15": "T Biomasse R1 Seite B oben",
-  "K.T16": "T Biomasse R1 Seite C unten",
-  "K.T17": "T Biomasse R1 Seite C mitte",
-  "K.T18": "T Biomasse R1 Seite C oben",
-  "K.T20": "T Biomasse R2 Seite A unten",
-  "K.T21": "T Biomasse R2 Seite A mitte",
-  "K.T22": "T Biomasse R2 Seite A oben",
-  "K.T23": "T Biomasse R2 Seite B unten",
-  "K.T24": "T Biomasse R2 Seite B mitte",
-  "K.T25": "T Biomasse R2 Seite B oben",
-  "K.T26": "T Biomasse R2 Seite C unten",
-  "K.T27": "T Biomasse R2 Seite C mitte",
-  "K.T28": "T Biomasse R2 Seite C oben",
-  "T1": "T VL Free Heating",
-  "T2": "T Puffer Verbraucher unten",
-  "T4": "T WT Verbraucherseite",
-  "K.TF1": "T OUT Puffer",
-  "K.TF4": "T IN Frischwasser",
-  "K.TF2": "T OUT EX latent A",
-  "K.TF3": "T OUT EX sensible B",
-  "K.TF7": "T OUT EX R2 latent A",
-  "K.TF8": "T OUT EX R2 sensible B",
-  "K.TF11": "T IN Frischwasser R2",
-  "TF1": "T RL Free Heating"
+const elementIds = {
+  copValue: "copValue",
+  eerValue: "eerValue",
+  coolingValue: "coolingValue",
+  heatValue: "heatValue",
+  electricValue: "electricValue",
+  poolValue: "poolValue",
+  r1Value: "r1Value",
+  r2Value: "r2Value",
+  tTankValue: "tTankValue",
+  tPoolValue: "tPoolValue",
+  tHeatingValue: "tHeatingValue",
+  tBioValue: "tBioValue",
+  tBio2Value: "tBio2Value",
+  lastUpdated: "lastUpdated",
+  energyChart: "energyChart",
+  tempChart: "tempChart",
+  noDataMessage: "noDataMessage",
+  copCard: "copCard",
+  eerCard: "eerCard",
+  heatCard: "heatCard",
 };
 
+document.addEventListener("DOMContentLoaded", () => {
+  initializeDateInputs();
+  document.getElementById("refreshButton").addEventListener("click", () => loadData());
+  loadData();
+});
 
-const userSensors = [
-  "T2", "T4", "TF1"
-];
+async function loadData() {
+  const { start, end } = getFilterValues();
+  showLoadingState(true);
 
-async function fetchData(start, end, ident) {
-  const url = `/.netlify/functions/data?ident=${ident}&start=${start}&end=${end}`;
-  console.log("Daten abrufen von", url);
-  const res = await fetch(url);
+  try {
+    const raw = await fetchData(start, end);
+    const normalized = normalizeData(raw);
+    const latest = normalized[normalized.length - 1];
+
+    renderEnergyChart(normalized);
+    renderTempChart(normalized);
+    updateStats(latest);
+    toggleNoData(normalized.length === 0);
+  } catch (err) {
+    console.error("Fehler beim Laden der Daten:", err);
+    toggleNoData(true);
+  } finally {
+    showLoadingState(false);
+  }
+}
+
+function initializeDateInputs() {
+  const endDate = new Date();
+  const startDate = new Date(endDate);
+  startDate.setHours(endDate.getHours() - 24);
+  document.getElementById("startDateTime").value = formatDateTimeLocal(startDate);
+  document.getElementById("endDateTime").value = formatDateTimeLocal(endDate);
+}
+
+function showLoadingState(isLoading) {
+  const button = document.getElementById("refreshButton");
+  button.textContent = isLoading ? "Lädt…" : "Aktualisieren";
+  button.disabled = isLoading;
+}
+
+function getFilterValues() {
+  const start = document.getElementById("startDateTime").value;
+  const end = document.getElementById("endDateTime").value;
+  return { start, end };
+}
+
+async function fetchData(start, end) {
+  const params = new URLSearchParams({
+    ident: IDENT,
+    start,
+    end,
+  });
+  const res = await fetch(`/.netlify/functions/data?${params.toString()}`);
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`API-Fehler (${res.status}): ${text}`);
+  }
   return res.json();
 }
 
-async function init() {
-  // alle idents einmal laden
-  const res = await fetch("/.netlify/functions/data?ident=Solos&start=1970-01-01T00:00:00Z&end=2100-01-01T00:00:00Z");
-  allData = await res.json();
+function normalizeData(data) {
+  const normalized = data
+    .map((item) => {
+      const time = parseTimestamp(item);
+      const copValues = filterPositive([item.COP_1, item.COP_2]);
+      const eerValues = filterPositive([item.EER_1, item.EER_2]);
+      const pWpCool = sumFields(item, ["P_cool_1", "P_cool_2"]);
+      const pWpHeat = sumFields(item, ["P_heat_1", "P_heat_2"]);
+      const pWpEl = sumFields(item, ["P_el_1", "P_el_2"]);
 
-  const idents = [...new Set(allData.map((item) => item.ident))];
+      return {
+        time,
+        COP: copValues.length ? average(copValues) : null,
+        EER: eerValues.length ? average(eerValues) : null,
+        P_Heat: toNumber(item.P_Heat),
+        P_Pool: toNumber(item.P_Pool),
+        P_WP_cool: pWpCool,
+        P_WP_el: pWpEl,
+        P_WP_heat: pWpHeat,
+        P_R1: sumFields(item, ["P_lat_A", "P_sen_B", "P_lat_C", "P_sen_D"]),
+        P_R2: sumFields(item, ["P_lat_A_R2", "P_lat_C_R2", "P_sen_B_R2", "P_sen_D_R2"]),
+        T_2000l_top: toNumber(item.T_2000l_top),
+        T_VL_pool: toNumber(item.T_VL_Pool),
+        T_VL_heating: toNumber(item.T_VL_heating),
+        T_max_BIO: toNumber(item.T_max_BIO),
+        T_max_BIO_R2: toNumber(item.T_max_BIO_R2),
+      };
+    })
+    .filter((entry) => entry.time)
+    .sort((a, b) => a.time - b.time);
 
-  const identSelect = document.getElementById("identSelect");
-  idents.forEach((ident) => {
-    const option = document.createElement("option");
-    option.value = ident;
-    option.textContent = ident;
-    identSelect.appendChild(option);
-  });
-
-  // Standard-Filter auf letzten 24h setzen
-  const end = new Date();
-  const start = new Date();
-  start.setHours(end.getHours() - 24);
-
-  document.getElementById("endDateTime").value = formatDateTimeLocal(end);
-  document.getElementById("startDateTime").value = formatDateTimeLocal(start);
-
-  identSelect.addEventListener("change", () => renderCharts());
-  document.getElementById("filterButton").addEventListener("click", () => renderCharts());
-
-  // Checkboxen generieren
-  generateCheckboxes("reactorCheckboxes", reactorSensors);
-  generateCheckboxes("biomassCheckboxes", biomassSensors);
-  generateCheckboxes("userCheckboxes", userSensors);
-
-  // direkt Render
-  await renderCharts();
+  return normalized;
 }
 
-function generateCheckboxes(containerId, sensorList) {
-  const container = document.getElementById(containerId);
-  container.innerHTML = "";
-  sensorList.forEach(sensor => {
-    const label = document.createElement("label");
-    const checkbox = document.createElement("input");
-    checkbox.type = "checkbox";
-    checkbox.value = sensor;
-    checkbox.checked = true;
-    checkbox.addEventListener("change", () => renderCharts());
-    label.appendChild(checkbox);
-    label.append(` ${sensorLabels[sensor] || sensor} `); // statt nur sensor
-    container.appendChild(label);
-  });
+function parseTimestamp(item) {
+  if (item.ts) {
+    return new Date(item.ts);
+  }
+  if (item.server && item.server.timestamp) {
+    return new Date(item.server.timestamp * 1000);
+  }
+  if (item.timestamp) {
+    return new Date(item.timestamp * 1000);
+  }
+  return null;
 }
 
+function filterPositive(values) {
+  return values
+    .map((value) => toNumber(value))
+    .filter((num) => num > 0);
+}
 
-async function renderCharts() {
-  const selectedIdent = document.getElementById("identSelect").value;
-  const startTime = document.getElementById("startDateTime").value;
-  const endTime = document.getElementById("endDateTime").value;
+function sumFields(item, keys) {
+  return keys.reduce((acc, key) => acc + toNumber(item[key]), 0);
+}
 
-  if (!selectedIdent || !startTime || !endTime) {
-    console.log("Fehlende Filterparameter, Abbruch");
-    return;
+function toNumber(value) {
+  const num = Number(value);
+  return Number.isFinite(num) ? num : 0;
+}
+
+function average(values) {
+  if (!values.length) return 0;
+  return values.reduce((sum, val) => sum + val, 0) / values.length;
+}
+
+function renderEnergyChart(data) {
+  const ctx = document.getElementById(elementIds.energyChart).getContext("2d");
+  const datasetConfig = [
+    { key: "P_Heat", label: "P_Heat", color: "#22d3ee" },
+    { key: "P_Pool", label: "P_Pool", color: "#a855f7" },
+    { key: "P_WP_cool", label: "P_WP_cool", color: "#fb7185" },
+    { key: "P_WP_el", label: "P_WP_el", color: "#facc15" },
+    { key: "P_WP_heat", label: "P_WP_heat", color: "#10b981" },
+    { key: "P_R1", label: "P_R1", color: "#f97316" },
+    { key: "P_R2", label: "P_R2", color: "#c084fc" },
+  ];
+
+  const datasets = datasetConfig.map(({ key, label, color }) => ({
+    label,
+    borderColor: color,
+    backgroundColor: color,
+    data: data.map((point) => ({ x: point.time, y: point[key] })),
+    fill: false,
+    tension: 0.25,
+    pointRadius: 1.5,
+    borderWidth: 2,
+  }));
+
+  if (energyChart) {
+    energyChart.destroy();
   }
 
-  allData = await fetchData(startTime, endTime, selectedIdent);
-  let filtered = allData;
-
-  // Reactor
-  const reactorActiveSensors = getActiveSensors("reactorCheckboxes");
-  const reactorDatasets = buildDatasets(filtered, reactorActiveSensors);
-  renderChart("reactorChart", reactorDatasets, "Reactor Temperaturen", filtered);
-
-  // Biomass
-  const biomassActiveSensors = getActiveSensors("biomassCheckboxes");
-  const biomassDatasets = buildDatasets(filtered, biomassActiveSensors);
-  renderChart("biomassChart", biomassDatasets, "Biomass Temperaturen", filtered);
-
-  // User
-  const userActiveSensors = getActiveSensors("userCheckboxes");
-  const userDatasets = buildDatasets(filtered, userActiveSensors);
-  renderChart("userChart", userDatasets, "User Temperaturen", filtered);
-}
-
-
-function getActiveSensors(containerId) {
-  const checkboxes = document.getElementById(containerId).querySelectorAll("input[type=checkbox]");
-  return Array.from(checkboxes)
-    .filter(cb => cb.checked)
-    .map(cb => cb.value);
-}
-
-function buildDatasets(data, sensors) {
-  return sensors.map(sensor => {
-    const values = data.map(item => ({
-      x: item.minute,
-      y: Number(item[sensor] || 0)
-    }));
-    return {
-      label: sensorLabels[sensor] || sensor,
-      data: values,
-      fill: false,
-      borderColor: randomColor(sensor),
-      tension: 0.2,
-      pointRadius: 2
-    };
-  });
-}
-
-function renderChart(canvasId, datasets, chartLabel, filteredData) {
-  if (window[canvasId + "_instance"]) {
-    window[canvasId + "_instance"].destroy();
-  }
-
-  const ctx = document.getElementById(canvasId).getContext("2d");
-  const chart = new Chart(ctx, {
+  energyChart = new Chart(ctx, {
     type: "line",
-    data: {
-      datasets: datasets
-    },
+    data: { datasets },
     options: {
       responsive: true,
       maintainAspectRatio: false,
-      plugins: {
-        legend: { position: "top" },
-        title: { display: true, text: chartLabel }
+      interaction: {
+        intersect: false,
+        mode: "index",
       },
       scales: {
         x: {
           type: "time",
           time: {
-            tooltipFormat: "yyyy-MM-dd HH:mm",
-            displayFormats: {
-              unit: window.innerWidth < 600 ? "day" : "hour",
-              hour: "dd.MM HH:mm"
-            },
-            unit: "minute",
-            stepSize: 5
+            unit: "hour",
+            tooltipFormat: "dd.MM. HH:mm",
           },
-          title: { display: true, text: "Zeit" }
+          title: { display: true, text: "Zeit" },
+          ticks: { color: "#cbd5f5" },
+          grid: { color: "rgba(255,255,255,0.08)" },
         },
         y: {
-          title: { display: true, text: "°C" }
-        }
-      }
-    }
+          title: { display: true, text: "Leistung (kW)" },
+          ticks: { color: "#cbd5f5" },
+          grid: { color: "rgba(255,255,255,0.08)" },
+        },
+      },
+      plugins: {
+        legend: { position: "top", labels: { color: "#e2e8f0" } },
+        tooltip: { callbacks: { label: (ctx) => `${ctx.dataset.label}: ${ctx.parsed.y.toFixed(1)} kW` } },
+      },
+    },
   });
-  window[canvasId + "_instance"] = chart;
 }
 
-// Hilfsfunktion für gerundetes Datum im 5-Minuten-Raster
-function formatDateTimeLocal(date) {
-  date.setMilliseconds(0);
-  date.setSeconds(0);
-  const minutes = date.getMinutes();
-  date.setMinutes(minutes - (minutes % 5));
-  return date.toISOString().slice(0,16);
-}
-
-// einfache Farbzuweisung
-function randomColor(seed) {
-  const colors = [
-    "red", "blue", "green", "orange", "purple", "brown", "black", "gray", "pink", "teal"
+function renderTempChart(data) {
+  const ctx = document.getElementById(elementIds.tempChart).getContext("2d");
+  const temps = [
+    { key: "T_2000l_top", label: "T_2000l_top", color: "#22d3ee" },
+    { key: "T_VL_pool", label: "T_VL_pool", color: "#a855f7" },
+    { key: "T_VL_heating", label: "T_VL_heating", color: "#f97316" },
+    { key: "T_max_BIO", label: "T_max_BIO", color: "#facc15" },
+    { key: "T_max_BIO_R2", label: "T_max_BIO_R2", color: "#34d399" },
   ];
-  let hash = 0;
-  for (let i = 0; i < seed.length; i++) {
-    hash += seed.charCodeAt(i);
+
+  const datasets = temps.map(({ key, label, color }) => ({
+    label,
+    borderColor: color,
+    backgroundColor: color,
+    data: data.map((point) => ({ x: point.time, y: point[key] })),
+    fill: false,
+    tension: 0.25,
+    pointRadius: 2,
+    borderWidth: 2,
+  }));
+
+  if (tempChart) {
+    tempChart.destroy();
   }
-  return colors[hash % colors.length];
+
+  tempChart = new Chart(ctx, {
+    type: "line",
+    data: { datasets },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: {
+        mode: "nearest",
+        intersect: false,
+      },
+      scales: {
+        x: {
+          type: "time",
+          time: {
+            tooltipFormat: "dd.MM. HH:mm",
+          },
+          ticks: { color: "#cbd5f5" },
+          grid: { color: "rgba(255,255,255,0.08)" },
+        },
+        y: {
+          title: { display: true, text: "Temperatur (°C)" },
+          ticks: { color: "#cbd5f5" },
+          grid: { color: "rgba(255,255,255,0.08)" },
+        },
+      },
+      plugins: {
+        legend: { position: "top", labels: { color: "#e2e8f0" } },
+      },
+    },
+  });
 }
 
-init();
+function updateStats(latest) {
+  const noData = !latest;
+  const copCard = document.getElementById(elementIds.copCard);
+  const eerCard = document.getElementById(elementIds.eerCard);
+  const heatCard = document.getElementById(elementIds.heatCard);
+
+  setText(elementIds.lastUpdated, latest ? formatTime(latest.time) : "–");
+  setText(elementIds.copValue, latest && latest.COP ? formatDecimal(latest.COP) : "–");
+  setText(elementIds.eerValue, latest && latest.EER ? formatDecimal(latest.EER) : "–");
+  setText(elementIds.coolingValue, latest ? formatDelta(latest.P_WP_cool) : "–");
+  setText(elementIds.heatValue, latest ? formatDelta(latest.P_WP_heat) : "–");
+  setText(elementIds.electricValue, latest ? formatDelta(latest.P_WP_el) : "–");
+  setText(elementIds.poolValue, latest ? formatPower(latest.P_Pool) : "–");
+  setText(elementIds.r1Value, latest ? formatPower(latest.P_R1) : "–");
+  setText(elementIds.r2Value, latest ? formatPower(latest.P_R2) : "–");
+  setText(elementIds.tTankValue, latest ? formatTemperature(latest.T_2000l_top) : "–");
+  setText(elementIds.tPoolValue, latest ? formatTemperature(latest.T_VL_pool) : "–");
+  setText(elementIds.tHeatingValue, latest ? formatTemperature(latest.T_VL_heating) : "–");
+  setText(elementIds.tBioValue, latest ? formatTemperature(latest.T_max_BIO) : "–");
+  setText(elementIds.tBio2Value, latest ? formatTemperature(latest.T_max_BIO_R2) : "–");
+
+  const coolingActive = latest && latest.P_WP_cool > 0;
+  copCard.classList.toggle("hidden", coolingActive || noData);
+  eerCard.classList.toggle("hidden", !coolingActive || noData);
+  heatCard.classList.toggle("hidden", coolingActive || noData);
+}
+
+function toggleNoData(show) {
+  const element = document.getElementById(elementIds.noDataMessage);
+  element.classList.toggle("hidden", !show);
+}
+
+function setText(id, value) {
+  const el = document.getElementById(id);
+  if (el) {
+    el.textContent = value;
+  }
+}
+
+function formatPower(value) {
+  return `${formatDelta(value)} kW`;
+}
+
+function formatDelta(value) {
+  const num = Number(value);
+  if (!Number.isFinite(num)) return "–";
+  return (num >= 0 ? "+" : "") + num.toFixed(1);
+}
+
+function formatTemperature(value) {
+  const num = Number(value);
+  return Number.isFinite(num) ? `${num.toFixed(1)} °C` : "–";
+}
+
+function formatDecimal(value) {
+  const num = Number(value);
+  return Number.isFinite(num) ? num.toFixed(2) : "–";
+}
+
+function formatTime(date) {
+  return new Intl.DateTimeFormat("de-DE", {
+    hour: "2-digit",
+    minute: "2-digit",
+    day: "2-digit",
+    month: "2-digit",
+  }).format(date);
+}
+
+function formatDateTimeLocal(date) {
+  const offset = date.getTimezoneOffset();
+  const local = new Date(date.getTime() - offset * 60 * 1000);
+  return local.toISOString().slice(0, 16);
+}
