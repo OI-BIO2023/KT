@@ -203,8 +203,8 @@
     .pair .box { position: relative; }
 
     .hotel-pair { left: 8.7%; top: 13.7%; }
-    .r1-pair { left: 49.8%; top: 45.8%; }
-    .r2-pair { left: 70.9%; top: 46.1%; }
+    .r1-pair { left: 49.8%; top: 48.8%; }
+    .r2-pair { left: 70.9%; top: 41.1%; }
     .pool-pair { left: 1.8%; top: 55.2%; }
 
     .hotel { border-left-color: var(--hotel); min-width: 222px; max-width: 252px; }
@@ -218,11 +218,12 @@
       background: var(--card);
       min-width: 122px;
       max-width: 136px;
-      padding: 0.38rem 0.46rem;
+      padding: 0.26rem 0.44rem;
     }
 
     .pair .temp { margin-right: -11px; }
     .pool-pair { transform: translateY(8px); }
+    .temp .line { gap: 0.2rem; }
 
     .temp .name,
     .temp .val {
@@ -297,11 +298,11 @@
 
       <svg class="flow" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
         <defs>
-          <path id="path_air_wp" class="guide-path" d="M84,52 C70,63 52,50 36,34"></path>
-          <path id="path_r1_wp" class="guide-path" d="M51,34 C45,31 40,30 36,29"></path>
-          <path id="path_r2_wp" class="guide-path" d="M72,34 C62,24 49,22 36,29"></path>
-          <path id="path_wp_hotel" class="guide-path" d="M30,29 C23,18 21,17 20,16"></path>
-          <path id="path_wp_pool" class="guide-path" d="M30,34 C25,40 19,43 14,42"></path>
+          <path id="path_air_wp" class="guide-path" d="M84,52 C70,63 56,50 46,37"></path>
+          <path id="path_r1_wp" class="guide-path" d="M51,37 C49,33 47,30 46,27"></path>
+          <path id="path_r2_wp" class="guide-path" d="M72,29 C62,21 54,22 46,27"></path>
+          <path id="path_wp_hotel" class="guide-path" d="M28,27 C23,18 21,17 20,16"></path>
+          <path id="path_wp_pool" class="guide-path" d="M28,37 C26,42 23,45 20,44"></path>
         </defs>
 
         <g aria-hidden="true">
@@ -330,71 +331,42 @@
           <line class="grid-line" x1="0" y1="100" x2="100" y2="100"></line><text class="grid-label" x="0.7" y="99.2">100</text>
         </g>
 
-        <path class="debug-path p-air" d="M84,52 C70,63 52,50 36,34"></path>
-        <path class="debug-path p-r1" d="M51,34 C45,31 40,30 36,29"></path>
-        <path class="debug-path p-r2" d="M72,34 C62,24 49,22 36,29"></path>
-        <path class="debug-path p-hotel" d="M30,29 C23,18 21,17 20,16"></path>
-        <path class="debug-path p-pool" d="M30,34 C25,40 19,43 14,42"></path>
+        <path class="debug-path p-air" d="M84,52 C70,63 56,50 46,37"></path>
+        <path class="debug-path p-r1" d="M51,37 C49,33 47,30 46,27"></path>
+        <path class="debug-path p-r2" d="M72,29 C62,21 54,22 46,27"></path>
+        <path class="debug-path p-hotel" d="M28,27 C23,18 21,17 20,16"></path>
+        <path class="debug-path p-pool" d="M28,37 C26,42 23,45 20,44"></path>
 
         <circle class="debug-point" cx="84" cy="52"></circle><text class="debug-label p-air" x="84.6" y="51.1">A S(84,52)</text>
         <circle class="debug-point" cx="70" cy="63"></circle><text class="debug-label p-air" x="70.6" y="62.1">A C1(70,63)</text>
-        <circle class="debug-point" cx="52" cy="50"></circle><text class="debug-label p-air" x="52.6" y="49.1">A C2(52,50)</text>
-        <circle class="debug-point" cx="36" cy="34"></circle><text class="debug-label p-air" x="36.6" y="33.1">A E(36,34)</text>
+        <circle class="debug-point" cx="56" cy="50"></circle><text class="debug-label p-air" x="56.6" y="49.1">A C2(56,50)</text>
+        <circle class="debug-point" cx="46" cy="37"></circle><text class="debug-label p-air" x="46.6" y="36.1">A E(46,37)</text>
 
-        <circle class="debug-point" cx="51" cy="34"></circle><text class="debug-label p-r1" x="51.6" y="33.1">R1 S(51,34)</text>
-        <circle class="debug-point" cx="45" cy="31"></circle><text class="debug-label p-r1" x="45.6" y="30.1">R1 C1(45,31)</text>
-        <circle class="debug-point" cx="40" cy="30"></circle><text class="debug-label p-r1" x="40.6" y="29.1">R1 C2(40,30)</text>
-        <circle class="debug-point" cx="36" cy="29"></circle><text class="debug-label p-r1" x="36.6" y="30.3">R1/R2 E(36,29)</text>
+        <circle class="debug-point" cx="51" cy="37"></circle><text class="debug-label p-r1" x="51.6" y="36.1">R1 S(51,37)</text>
+        <circle class="debug-point" cx="49" cy="33"></circle><text class="debug-label p-r1" x="49.6" y="32.1">R1 C1(49,33)</text>
+        <circle class="debug-point" cx="47" cy="30"></circle><text class="debug-label p-r1" x="47.6" y="29.1">R1 C2(47,30)</text>
+        <circle class="debug-point" cx="46" cy="27"></circle><text class="debug-label p-r1" x="46.6" y="28.3">R1 E(46,27)</text>
 
-        <circle class="debug-point" cx="72" cy="34"></circle><text class="debug-label p-r2" x="72.6" y="33.1">R2 S(72,34)</text>
-        <circle class="debug-point" cx="62" cy="24"></circle><text class="debug-label p-r2" x="62.6" y="23.1">R2 C1(62,24)</text>
-        <circle class="debug-point" cx="49" cy="22"></circle><text class="debug-label p-r2" x="49.6" y="21.1">R2 C2(49,22)</text>
-        <circle class="debug-point" cx="36" cy="29"></circle><text class="debug-label p-r2" x="31.8" y="32.2">R2 E(36,29)</text>
+        <circle class="debug-point" cx="72" cy="29"></circle><text class="debug-label p-r2" x="72.6" y="28.1">R2 S(72,29)</text>
+        <circle class="debug-point" cx="62" cy="21"></circle><text class="debug-label p-r2" x="62.6" y="20.1">R2 C1(62,21)</text>
+        <circle class="debug-point" cx="54" cy="22"></circle><text class="debug-label p-r2" x="54.6" y="21.1">R2 C2(54,22)</text>
+        <circle class="debug-point" cx="46" cy="27"></circle><text class="debug-label p-r2" x="41.8" y="30.2">R2 E(46,27)</text>
 
-        <circle class="debug-point" cx="30" cy="29"></circle><text class="debug-label p-hotel" x="22.8" y="26.7">H S(30,29)</text>
+        <circle class="debug-point" cx="28" cy="27"></circle><text class="debug-label p-hotel" x="20.8" y="24.7">H S(28,27)</text>
         <circle class="debug-point" cx="23" cy="18"></circle><text class="debug-label p-hotel" x="23.6" y="17.1">H C1(23,18)</text>
         <circle class="debug-point" cx="21" cy="17"></circle><text class="debug-label p-hotel" x="21.6" y="16.1">H C2(21,17)</text>
         <circle class="debug-point" cx="20" cy="16"></circle><text class="debug-label p-hotel" x="20.6" y="15.1">H E(20,16)</text>
 
-        <circle class="debug-point" cx="30" cy="34"></circle><text class="debug-label p-pool" x="22.8" y="37.3">P S(30,34)</text>
-        <circle class="debug-point" cx="25" cy="40"></circle><text class="debug-label p-pool" x="25.6" y="39.1">P C1(25,40)</text>
-        <circle class="debug-point" cx="19" cy="43"></circle><text class="debug-label p-pool" x="19.6" y="42.1">P C2(19,43)</text>
-        <circle class="debug-point" cx="14" cy="42"></circle><text class="debug-label p-pool" x="14.6" y="41.1">P E(14,42)</text>
+        <circle class="debug-point" cx="28" cy="37"></circle><text class="debug-label p-pool" x="20.8" y="40.3">P S(28,37)</text>
+        <circle class="debug-point" cx="26" cy="42"></circle><text class="debug-label p-pool" x="26.6" y="41.1">P C1(26,42)</text>
+        <circle class="debug-point" cx="23" cy="45"></circle><text class="debug-label p-pool" x="23.6" y="44.1">P C2(23,45)</text>
+        <circle class="debug-point" cx="20" cy="44"></circle><text class="debug-label p-pool" x="20.6" y="43.1">P E(20,44)</text>
 
-        <g class="arrow-glyph p-air"><path d="M0,0 L-1.9,-1.2"></path><path d="M0,0 L-1.9,1.2"></path><animateMotion dur="7.0s" repeatCount="indefinite" rotate="auto"><mpath href="#path_air_wp"></mpath></animateMotion></g>
-        <g class="arrow-glyph p-air"><path d="M0,0 L-1.9,-1.2"></path><path d="M0,0 L-1.9,1.2"></path><animateMotion dur="7.0s" begin="-0.9s" repeatCount="indefinite" rotate="auto"><mpath href="#path_air_wp"></mpath></animateMotion></g>
-        <g class="arrow-glyph p-air"><path d="M0,0 L-1.9,-1.2"></path><path d="M0,0 L-1.9,1.2"></path><animateMotion dur="7.0s" begin="-1.8s" repeatCount="indefinite" rotate="auto"><mpath href="#path_air_wp"></mpath></animateMotion></g>
-        <g class="arrow-glyph p-air"><path d="M0,0 L-1.9,-1.2"></path><path d="M0,0 L-1.9,1.2"></path><animateMotion dur="7.0s" begin="-2.7s" repeatCount="indefinite" rotate="auto"><mpath href="#path_air_wp"></mpath></animateMotion></g>
-        <g class="arrow-glyph p-air"><path d="M0,0 L-1.9,-1.2"></path><path d="M0,0 L-1.9,1.2"></path><animateMotion dur="7.0s" begin="-3.6s" repeatCount="indefinite" rotate="auto"><mpath href="#path_air_wp"></mpath></animateMotion></g>
-        <g class="arrow-glyph p-air"><path d="M0,0 L-1.9,-1.2"></path><path d="M0,0 L-1.9,1.2"></path><animateMotion dur="7.0s" begin="-4.5s" repeatCount="indefinite" rotate="auto"><mpath href="#path_air_wp"></mpath></animateMotion></g>
-
-        <g class="arrow-glyph p-r1"><path d="M0,0 L-1.8,-1.1"></path><path d="M0,0 L-1.8,1.1"></path><animateMotion dur="7.0s" repeatCount="indefinite" rotate="auto"><mpath href="#path_r1_wp"></mpath></animateMotion></g>
-        <g class="arrow-glyph p-r1"><path d="M0,0 L-1.8,-1.1"></path><path d="M0,0 L-1.8,1.1"></path><animateMotion dur="7.0s" begin="-0.9s" repeatCount="indefinite" rotate="auto"><mpath href="#path_r1_wp"></mpath></animateMotion></g>
-        <g class="arrow-glyph p-r1"><path d="M0,0 L-1.8,-1.1"></path><path d="M0,0 L-1.8,1.1"></path><animateMotion dur="7.0s" begin="-1.8s" repeatCount="indefinite" rotate="auto"><mpath href="#path_r1_wp"></mpath></animateMotion></g>
-        <g class="arrow-glyph p-r1"><path d="M0,0 L-1.8,-1.1"></path><path d="M0,0 L-1.8,1.1"></path><animateMotion dur="7.0s" begin="-2.7s" repeatCount="indefinite" rotate="auto"><mpath href="#path_r1_wp"></mpath></animateMotion></g>
-        <g class="arrow-glyph p-r1"><path d="M0,0 L-1.8,-1.1"></path><path d="M0,0 L-1.8,1.1"></path><animateMotion dur="7.0s" begin="-3.6s" repeatCount="indefinite" rotate="auto"><mpath href="#path_r1_wp"></mpath></animateMotion></g>
-        <g class="arrow-glyph p-r1"><path d="M0,0 L-1.8,-1.1"></path><path d="M0,0 L-1.8,1.1"></path><animateMotion dur="7.0s" begin="-4.5s" repeatCount="indefinite" rotate="auto"><mpath href="#path_r1_wp"></mpath></animateMotion></g>
-
-        <g class="arrow-glyph p-r2"><path d="M0,0 L-1.8,-1.1"></path><path d="M0,0 L-1.8,1.1"></path><animateMotion dur="7.0s" repeatCount="indefinite" rotate="auto"><mpath href="#path_r2_wp"></mpath></animateMotion></g>
-        <g class="arrow-glyph p-r2"><path d="M0,0 L-1.8,-1.1"></path><path d="M0,0 L-1.8,1.1"></path><animateMotion dur="7.0s" begin="-0.9s" repeatCount="indefinite" rotate="auto"><mpath href="#path_r2_wp"></mpath></animateMotion></g>
-        <g class="arrow-glyph p-r2"><path d="M0,0 L-1.8,-1.1"></path><path d="M0,0 L-1.8,1.1"></path><animateMotion dur="7.0s" begin="-1.8s" repeatCount="indefinite" rotate="auto"><mpath href="#path_r2_wp"></mpath></animateMotion></g>
-        <g class="arrow-glyph p-r2"><path d="M0,0 L-1.8,-1.1"></path><path d="M0,0 L-1.8,1.1"></path><animateMotion dur="7.0s" begin="-2.7s" repeatCount="indefinite" rotate="auto"><mpath href="#path_r2_wp"></mpath></animateMotion></g>
-        <g class="arrow-glyph p-r2"><path d="M0,0 L-1.8,-1.1"></path><path d="M0,0 L-1.8,1.1"></path><animateMotion dur="7.0s" begin="-3.6s" repeatCount="indefinite" rotate="auto"><mpath href="#path_r2_wp"></mpath></animateMotion></g>
-        <g class="arrow-glyph p-r2"><path d="M0,0 L-1.8,-1.1"></path><path d="M0,0 L-1.8,1.1"></path><animateMotion dur="7.0s" begin="-4.5s" repeatCount="indefinite" rotate="auto"><mpath href="#path_r2_wp"></mpath></animateMotion></g>
-
-        <g class="arrow-glyph p-hotel"><path d="M0,0 L-1.8,-1.1"></path><path d="M0,0 L-1.8,1.1"></path><animateMotion dur="7.0s" repeatCount="indefinite" rotate="auto"><mpath href="#path_wp_hotel"></mpath></animateMotion></g>
-        <g class="arrow-glyph p-hotel"><path d="M0,0 L-1.8,-1.1"></path><path d="M0,0 L-1.8,1.1"></path><animateMotion dur="7.0s" begin="-0.9s" repeatCount="indefinite" rotate="auto"><mpath href="#path_wp_hotel"></mpath></animateMotion></g>
-        <g class="arrow-glyph p-hotel"><path d="M0,0 L-1.8,-1.1"></path><path d="M0,0 L-1.8,1.1"></path><animateMotion dur="7.0s" begin="-1.8s" repeatCount="indefinite" rotate="auto"><mpath href="#path_wp_hotel"></mpath></animateMotion></g>
-        <g class="arrow-glyph p-hotel"><path d="M0,0 L-1.8,-1.1"></path><path d="M0,0 L-1.8,1.1"></path><animateMotion dur="7.0s" begin="-2.7s" repeatCount="indefinite" rotate="auto"><mpath href="#path_wp_hotel"></mpath></animateMotion></g>
-        <g class="arrow-glyph p-hotel"><path d="M0,0 L-1.8,-1.1"></path><path d="M0,0 L-1.8,1.1"></path><animateMotion dur="7.0s" begin="-3.6s" repeatCount="indefinite" rotate="auto"><mpath href="#path_wp_hotel"></mpath></animateMotion></g>
-        <g class="arrow-glyph p-hotel"><path d="M0,0 L-1.8,-1.1"></path><path d="M0,0 L-1.8,1.1"></path><animateMotion dur="7.0s" begin="-4.5s" repeatCount="indefinite" rotate="auto"><mpath href="#path_wp_hotel"></mpath></animateMotion></g>
-
-        <g class="arrow-glyph p-pool"><path d="M0,0 L-1.8,-1.1"></path><path d="M0,0 L-1.8,1.1"></path><animateMotion dur="7.0s" repeatCount="indefinite" rotate="auto"><mpath href="#path_wp_pool"></mpath></animateMotion></g>
-        <g class="arrow-glyph p-pool"><path d="M0,0 L-1.8,-1.1"></path><path d="M0,0 L-1.8,1.1"></path><animateMotion dur="7.0s" begin="-0.9s" repeatCount="indefinite" rotate="auto"><mpath href="#path_wp_pool"></mpath></animateMotion></g>
-        <g class="arrow-glyph p-pool"><path d="M0,0 L-1.8,-1.1"></path><path d="M0,0 L-1.8,1.1"></path><animateMotion dur="7.0s" begin="-1.8s" repeatCount="indefinite" rotate="auto"><mpath href="#path_wp_pool"></mpath></animateMotion></g>
-        <g class="arrow-glyph p-pool"><path d="M0,0 L-1.8,-1.1"></path><path d="M0,0 L-1.8,1.1"></path><animateMotion dur="7.0s" begin="-2.7s" repeatCount="indefinite" rotate="auto"><mpath href="#path_wp_pool"></mpath></animateMotion></g>
-        <g class="arrow-glyph p-pool"><path d="M0,0 L-1.8,-1.1"></path><path d="M0,0 L-1.8,1.1"></path><animateMotion dur="7.0s" begin="-3.6s" repeatCount="indefinite" rotate="auto"><mpath href="#path_wp_pool"></mpath></animateMotion></g>
-        <g class="arrow-glyph p-pool"><path d="M0,0 L-1.8,-1.1"></path><path d="M0,0 L-1.8,1.1"></path><animateMotion dur="7.0s" begin="-4.5s" repeatCount="indefinite" rotate="auto"><mpath href="#path_wp_pool"></mpath></animateMotion></g>
+        <g id="arrows-air"></g>
+        <g id="arrows-r1"></g>
+        <g id="arrows-r2"></g>
+        <g id="arrows-hotel"></g>
+        <g id="arrows-pool"></g>
       </svg>
 
       <div class="pair hotel-pair">
@@ -445,6 +417,62 @@
     </section>
   </main>
 
+  <script>
+    (function () {
+      const ns = "http://www.w3.org/2000/svg";
+      const specs = [
+        { path: "path_air_wp", container: "arrows-air", cls: "p-air" },
+        { path: "path_r1_wp", container: "arrows-r1", cls: "p-r1" },
+        { path: "path_r2_wp", container: "arrows-r2", cls: "p-r2" },
+        { path: "path_wp_hotel", container: "arrows-hotel", cls: "p-hotel" },
+        { path: "path_wp_pool", container: "arrows-pool", cls: "p-pool" },
+      ];
+
+      const refPath = document.getElementById("path_air_wp");
+      if (!refPath) return;
+
+      const refDur = 7.0;
+      const refLen = refPath.getTotalLength() || 1;
+      const refCount = 10;
+      const spacingDist = refLen / refCount;
+
+      for (const spec of specs) {
+        const path = document.getElementById(spec.path);
+        const container = document.getElementById(spec.container);
+        if (!path || !container) continue;
+
+        const len = path.getTotalLength() || 1;
+        const count = Math.max(4, Math.round(len / spacingDist));
+        const dur = refDur * (len / refLen);
+        const step = dur / count;
+
+        for (let i = 0; i < count; i += 1) {
+          const g = document.createElementNS(ns, "g");
+          g.setAttribute("class", `arrow-glyph ${spec.cls}`);
+
+          const p1 = document.createElementNS(ns, "path");
+          p1.setAttribute("d", "M0,0 L-1.8,-1.1");
+          const p2 = document.createElementNS(ns, "path");
+          p2.setAttribute("d", "M0,0 L-1.8,1.1");
+
+          const motion = document.createElementNS(ns, "animateMotion");
+          motion.setAttribute("dur", `${dur.toFixed(3)}s`);
+          motion.setAttribute("begin", `${(-i * step).toFixed(3)}s`);
+          motion.setAttribute("repeatCount", "indefinite");
+          motion.setAttribute("rotate", "auto");
+
+          const mpath = document.createElementNS(ns, "mpath");
+          mpath.setAttribute("href", `#${spec.path}`);
+          motion.appendChild(mpath);
+
+          g.appendChild(p1);
+          g.appendChild(p2);
+          g.appendChild(motion);
+          container.appendChild(g);
+        }
+      }
+    })();
+  </script>
   <script src="live_leisenhof_reactor1.js"></script>
 </body>
 </html>
