@@ -204,26 +204,27 @@
 
     .hotel-pair { left: 8.7%; top: 13.7%; }
     .r1-pair { left: 49.8%; top: 48.8%; }
-    .r2-pair { left: 70.9%; top: 41.1%; }
+    .r2-pair { left: 75.9%; top: 39.1%; }
     .pool-pair { left: 1.8%; top: 55.2%; }
 
-    .hotel { border-left-color: var(--hotel); min-width: 222px; max-width: 252px; }
+    .hotel { border-left-color: var(--hotel); min-width: 196px; max-width: 224px; }
     .r1 { border-left-color: var(--r1); min-width: 230px; max-width: 260px; }
     .r2 { border-left-color: var(--r2); min-width: 230px; max-width: 260px; }
-    .pool { border-left-color: var(--pool); min-width: 214px; max-width: 246px; }
+    .pool { border-left-color: var(--pool); min-width: 188px; max-width: 216px; }
 
     .temp {
       border: 1px solid var(--temp-border);
       border-left: 5px solid var(--temp-border);
       background: var(--card);
-      min-width: 122px;
-      max-width: 136px;
+      min-width: 104px;
+      max-width: 118px;
       padding: 0.26rem 0.44rem;
+      font-size: clamp(14px, 1.0vw, 16px);
     }
 
     .pair .temp { margin-right: -11px; }
     .pool-pair { transform: translateY(8px); }
-    .temp .line { gap: 0.2rem; }
+    .temp .line { gap: 0.14rem; }
 
     .temp .name,
     .temp .val {
@@ -235,8 +236,8 @@
       left: 25.6%;
       top: 42.7%;
       border-left-color: var(--wp);
-      min-width: 248px;
-      max-width: 280px;
+      min-width: 224px;
+      max-width: 252px;
     }
 
     .wp .title {
@@ -289,7 +290,7 @@
           <span>Status: <strong id="connState">warte auf API...</strong></span>
           <span>Letztes Update: <strong id="lastSeen">-</strong></span>
         </div>
-        <div class="link-row"><a href="index.html">Zur historischen Visualisierung</a></div>
+        <div class="link-row"><a href="/index.html">Historie</a></div>
       </div>
     </header>
 
@@ -299,8 +300,8 @@
       <svg class="flow" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
         <defs>
           <path id="path_air_wp" class="guide-path" d="M84,52 C70,63 56,50 46,37"></path>
-          <path id="path_r1_wp" class="guide-path" d="M51,37 C49,33 47,30 46,27"></path>
-          <path id="path_r2_wp" class="guide-path" d="M72,29 C62,21 54,22 46,27"></path>
+          <path id="path_r1_wp" class="guide-path" d="M58,35 C54,26 49,24 46,27"></path>
+          <path id="path_r2_wp" class="guide-path" d="M77,27 C67,19 58,20 46,27"></path>
           <path id="path_wp_hotel" class="guide-path" d="M28,27 C23,18 21,17 20,16"></path>
           <path id="path_wp_pool" class="guide-path" d="M28,37 C26,42 23,45 20,44"></path>
         </defs>
@@ -332,8 +333,8 @@
         </g>
 
         <path class="debug-path p-air" d="M84,52 C70,63 56,50 46,37"></path>
-        <path class="debug-path p-r1" d="M51,37 C49,33 47,30 46,27"></path>
-        <path class="debug-path p-r2" d="M72,29 C62,21 54,22 46,27"></path>
+        <path class="debug-path p-r1" d="M58,35 C54,26 49,24 46,27"></path>
+        <path class="debug-path p-r2" d="M77,27 C67,19 58,20 46,27"></path>
         <path class="debug-path p-hotel" d="M28,27 C23,18 21,17 20,16"></path>
         <path class="debug-path p-pool" d="M28,37 C26,42 23,45 20,44"></path>
 
@@ -342,14 +343,14 @@
         <circle class="debug-point" cx="56" cy="50"></circle><text class="debug-label p-air" x="56.6" y="49.1">A C2(56,50)</text>
         <circle class="debug-point" cx="46" cy="37"></circle><text class="debug-label p-air" x="46.6" y="36.1">A E(46,37)</text>
 
-        <circle class="debug-point" cx="51" cy="37"></circle><text class="debug-label p-r1" x="51.6" y="36.1">R1 S(51,37)</text>
-        <circle class="debug-point" cx="49" cy="33"></circle><text class="debug-label p-r1" x="49.6" y="32.1">R1 C1(49,33)</text>
-        <circle class="debug-point" cx="47" cy="30"></circle><text class="debug-label p-r1" x="47.6" y="29.1">R1 C2(47,30)</text>
+        <circle class="debug-point" cx="58" cy="35"></circle><text class="debug-label p-r1" x="58.6" y="34.1">R1 S(58,35)</text>
+        <circle class="debug-point" cx="54" cy="26"></circle><text class="debug-label p-r1" x="54.6" y="25.1">R1 C1(54,26)</text>
+        <circle class="debug-point" cx="49" cy="24"></circle><text class="debug-label p-r1" x="49.6" y="23.1">R1 C2(49,24)</text>
         <circle class="debug-point" cx="46" cy="27"></circle><text class="debug-label p-r1" x="46.6" y="28.3">R1 E(46,27)</text>
 
-        <circle class="debug-point" cx="72" cy="29"></circle><text class="debug-label p-r2" x="72.6" y="28.1">R2 S(72,29)</text>
-        <circle class="debug-point" cx="62" cy="21"></circle><text class="debug-label p-r2" x="62.6" y="20.1">R2 C1(62,21)</text>
-        <circle class="debug-point" cx="54" cy="22"></circle><text class="debug-label p-r2" x="54.6" y="21.1">R2 C2(54,22)</text>
+        <circle class="debug-point" cx="77" cy="27"></circle><text class="debug-label p-r2" x="77.6" y="26.1">R2 S(77,27)</text>
+        <circle class="debug-point" cx="67" cy="19"></circle><text class="debug-label p-r2" x="67.6" y="18.1">R2 C1(67,19)</text>
+        <circle class="debug-point" cx="58" cy="20"></circle><text class="debug-label p-r2" x="58.6" y="19.1">R2 C2(58,20)</text>
         <circle class="debug-point" cx="46" cy="27"></circle><text class="debug-label p-r2" x="41.8" y="30.2">R2 E(46,27)</text>
 
         <circle class="debug-point" cx="28" cy="27"></circle><text class="debug-label p-hotel" x="20.8" y="24.7">H S(28,27)</text>
@@ -431,7 +432,7 @@
       const refPath = document.getElementById("path_air_wp");
       if (!refPath) return;
 
-      const refDur = 7.0;
+      const refDur = 8.8;
       const refLen = refPath.getTotalLength() || 1;
       const refCount = 10;
       const spacingDist = refLen / refCount;
