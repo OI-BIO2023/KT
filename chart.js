@@ -2,9 +2,10 @@ const IDENT = "LH";
 const WP_DIVISOR = 10;
 const WP_SCALE_KEYS = new Set(["P_heat_1", "P_cool_1", "P_el_1", "P_heat_2", "P_cool_2", "P_el_2"]);
 const COLORS = {
-  wp: "#1fbf3d",
-  r1: "#7a2f1b",
-  r2: "#8d3b22",
+  wp: "#6b7280",
+  wp2: "#94a3b8",
+  r1: "#a3291b",
+  r2: "#d4552f",
   air: "#1e3a8a",
   hotel: "#d4af37",
   pool: "#3b82f6",
@@ -70,14 +71,12 @@ async function fetchData(start, end) {
   });
 
   const res = await fetch(`/.netlify/functions/data?${params.toString()}`);
-  if (!res.ok) {
-    throw new Error(`API ${res.status}`);
-  }
+  if (!res.ok) throw new Error(`API ${res.status}`);
   return res.json();
 }
 
 function normalizeData(items) {
-  const normalized = items
+  return items
     .map((row) => {
       const time = parseTimestamp(row);
       if (!time) return null;
@@ -115,8 +114,6 @@ function normalizeData(items) {
     })
     .filter(Boolean)
     .sort((a, b) => a.time - b.time);
-
-  return normalized;
 }
 
 function maybeScaleWpValues(row) {
@@ -127,7 +124,6 @@ function maybeScaleWpValues(row) {
     Math.abs(toNumber(copy.P_el_1)),
     Math.abs(toNumber(copy.P_el_2))
   );
-
   if (maybeUnscaled > 120) {
     for (const key of WP_SCALE_KEYS) {
       if (key in copy) copy[key] = toNumber(copy[key]) / WP_DIVISOR;
@@ -143,6 +139,10 @@ function parseTimestamp(item) {
 
 function renderEnergyChart(points) {
   const ctx = document.getElementById("energyChart").getContext("2d");
+  const bounds = computeBounds(
+    points.flatMap((p) => [p.P_WP1, p.P_WP2, p.P_R1, p.P_R2, p.P_L]),
+    { includeZero: true, symmetric: true }
+  );
 
   const datasets = [
     {
@@ -150,7 +150,7 @@ function renderEnergyChart(points) {
       label: "Leistung Waermepumpe 1",
       data: points.map((p) => ({ x: p.time, y: p.P_WP1 })),
       borderColor: COLORS.wp,
-      backgroundColor: "rgba(31,191,61,0.38)",
+      backgroundColor: "rgba(107,114,128,0.58)",
       fill: "origin",
       tension: 0.22,
       pointRadius: 0,
@@ -161,8 +161,8 @@ function renderEnergyChart(points) {
       type: "line",
       label: "Leistung Waermepumpe 2",
       data: points.map((p) => ({ x: p.time, y: p.P_WP2 })),
-      borderColor: "#2fd95a",
-      backgroundColor: "rgba(47,217,90,0.28)",
+      borderColor: COLORS.wp2,
+      backgroundColor: "rgba(148,163,184,0.38)",
       fill: "-1",
       tension: 0.22,
       pointRadius: 0,
@@ -208,61 +208,34 @@ function renderEnergyChart(points) {
   energyChart = new Chart(ctx, {
     type: "line",
     data: { datasets },
-    options: buildChartOptions("Leistung (kW)", "kW"),
+    options: buildChartOptions("Leistung (kW)", "kW", bounds),
   });
 }
 
 function renderTempChart(points) {
   const ctx = document.getElementById("tempChart").getContext("2d");
+  const bounds = computeBounds(
+    points.flatMap((p) => [p.T_VL_hotel, p.T_VL_pool, p.T_puffer_2000l, p.T_max_R1, p.T_max_R2]),
+    { includeZero: false, symmetric: false }
+  );
 
   const datasets = [
-    {
-      label: "Temperatur VL Hotel",
-      data: points.map((p) => ({ x: p.time, y: p.T_VL_hotel })),
-      borderColor: COLORS.hotel,
-      backgroundColor: COLORS.hotel,
-    },
-    {
-      label: "Temperatur VL Pool",
-      data: points.map((p) => ({ x: p.time, y: p.T_VL_pool })),
-      borderColor: COLORS.pool,
-      backgroundColor: COLORS.pool,
-    },
-    {
-      label: "Temperatur Puffer 2000 l",
-      data: points.map((p) => ({ x: p.time, y: p.T_puffer_2000l })),
-      borderColor: COLORS.puffer,
-      backgroundColor: COLORS.puffer,
-    },
-    {
-      label: "Temperatur Max R1",
-      data: points.map((p) => ({ x: p.time, y: p.T_max_R1 })),
-      borderColor: COLORS.r1,
-      backgroundColor: COLORS.r1,
-    },
-    {
-      label: "Temperatur Max R2",
-      data: points.map((p) => ({ x: p.time, y: p.T_max_R2 })),
-      borderColor: COLORS.r2,
-      backgroundColor: COLORS.r2,
-    },
-  ].map((d) => ({
-    ...d,
-    fill: false,
-    tension: 0.22,
-    pointRadius: 0,
-    borderWidth: 2,
-  }));
+    { label: "Temperatur VL Hotel", data: points.map((p) => ({ x: p.time, y: p.T_VL_hotel })), borderColor: COLORS.hotel, backgroundColor: COLORS.hotel },
+    { label: "Temperatur VL Pool", data: points.map((p) => ({ x: p.time, y: p.T_VL_pool })), borderColor: COLORS.pool, backgroundColor: COLORS.pool },
+    { label: "Temperatur Puffer 2000 l", data: points.map((p) => ({ x: p.time, y: p.T_puffer_2000l })), borderColor: COLORS.puffer, backgroundColor: COLORS.puffer },
+    { label: "Temperatur Max R1", data: points.map((p) => ({ x: p.time, y: p.T_max_R1 })), borderColor: COLORS.r1, backgroundColor: COLORS.r1 },
+    { label: "Temperatur Max R2", data: points.map((p) => ({ x: p.time, y: p.T_max_R2 })), borderColor: COLORS.r2, backgroundColor: COLORS.r2 },
+  ].map((d) => ({ ...d, fill: false, tension: 0.22, pointRadius: 0, borderWidth: 2 }));
 
   if (tempChart) tempChart.destroy();
   tempChart = new Chart(ctx, {
     type: "line",
     data: { datasets },
-    options: buildChartOptions("Temperatur (°C)", "°C"),
+    options: buildChartOptions("Temperatur (°C)", "°C", bounds),
   });
 }
 
-function buildChartOptions(yTitle, unit) {
+function buildChartOptions(yTitle, unit, yBounds) {
   return {
     responsive: true,
     maintainAspectRatio: false,
@@ -276,6 +249,8 @@ function buildChartOptions(yTitle, unit) {
         title: { display: true, text: "Zeit", color: "#b4c3de" },
       },
       y: {
+        min: yBounds.min,
+        max: yBounds.max,
         ticks: { color: "#c9d6ee" },
         grid: { color: "rgba(255,255,255,0.08)" },
         title: { display: true, text: yTitle, color: "#b4c3de" },
@@ -292,10 +267,39 @@ function buildChartOptions(yTitle, unit) {
   };
 }
 
+function computeBounds(values, opts) {
+  const clean = values.filter((v) => Number.isFinite(v)).sort((a, b) => a - b);
+  if (!clean.length) return { min: opts.includeZero ? 0 : -1, max: 1 };
+  const low = percentile(clean, 0.05);
+  const high = percentile(clean, 0.95);
+  let min = low;
+  let max = high;
+  if (opts.includeZero) {
+    min = Math.min(min, 0);
+    max = Math.max(max, 0);
+  }
+  if (opts.symmetric) {
+    const m = Math.max(Math.abs(min), Math.abs(max));
+    min = -m;
+    max = m;
+  }
+  const span = Math.max(0.01, max - min);
+  const pad = span * 0.12;
+  return { min: min - pad, max: max + pad };
+}
+
+function percentile(sorted, q) {
+  if (!sorted.length) return 0;
+  const pos = (sorted.length - 1) * q;
+  const base = Math.floor(pos);
+  const rest = pos - base;
+  if (sorted[base + 1] !== undefined) return sorted[base] + rest * (sorted[base + 1] - sorted[base]);
+  return sorted[base];
+}
+
 function updateHighlights(points) {
   const latest = points[points.length - 1];
   setText("lastUpdated", latest ? formatTime(latest.time) : "-");
-
   if (!points.length) {
     setText("copValue", "-");
     setText("sumR1Value", "-");
