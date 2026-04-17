@@ -6,3 +6,9 @@ from = "/"
 to = "/live_leisenhof_reactor1.html"
 status = 302
 force = true
+
+[[redirects]]
+from = "/historie"
+to = "/index.html"
+status = 200
+force = true
