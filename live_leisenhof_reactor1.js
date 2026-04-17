@@ -60,7 +60,6 @@ function render(data) {
 
   setMetric("technikPWpEl", pWpEl, "kW");
   setMetric("technikPWpHeat", pWpHeat, "kW");
-  setMetric("technikPWpCool", pWpCool, "kW");
   setMetric("r1Power", pR1, "kW");
   setMetric("r2Power", pR2, "kW");
   setMetric("r1Temp", data.T_max_BIO, "degC");
@@ -71,8 +70,6 @@ function render(data) {
   setMetric("poolTemp", data.T_VL_Pool, "degC");
   setMetric("airPower", pL, "kW");
 
-  toggle("technikHeatRow", pWpHeat > 0);
-  toggle("technikCoolRow", pWpCool > 0);
 }
 
 function sum(obj, keys) {
@@ -97,11 +94,4 @@ function setMetric(id, value, unit) {
 function setText(id, value) {
   const el = document.getElementById(id);
   if (el) el.textContent = value;
-}
-
-function toggle(id, visible) {
-  const el = document.getElementById(id);
-  if (el) {
-    el.classList.toggle("hidden", !visible);
-  }
 }
