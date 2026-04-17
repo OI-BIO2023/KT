@@ -1,66 +1,72 @@
 const IDENT = "LH";
+const POLL_MS = 10000;
 
-const client = mqtt.connect("wss://mqtt.flespi.io:443", {
-  username: "FlespiToken 9KrYqIGZhixeaUSnSxcsztHfPNB6tHfjQJfvMGtKvHOdiBTUeCWDLfMNhwEVgwGG",
-});
+bootstrap();
 
-client.on("connect", () => {
-  setText("connState", "verbunden");
-  client.subscribe("#");
-});
+function bootstrap() {
+  refresh();
+  setInterval(refresh, POLL_MS);
+}
 
-client.on("reconnect", () => setText("connState", "verbinde..."));
-client.on("offline", () => setText("connState", "offline"));
-client.on("error", (err) => {
-  setText("connState", "fehler");
-  console.error("MQTT-Fehler", err);
-});
-
-client.on("message", (topic, message) => {
+async function refresh() {
   try {
-    const payload = JSON.parse(message.toString());
-    const data = pickLhPayload(payload);
-    if (!data) return;
+    const end = new Date();
+    const start = new Date(end.getTime() - 60 * 60 * 1000);
+    const params = new URLSearchParams({
+      ident: IDENT,
+      type: "value",
+      start: start.toISOString(),
+      end: end.toISOString(),
+    });
 
-    const pWpCool = sum(data, ["P_cool_1", "P_cool_2"]);
-    const pWpEl = sum(data, ["P_el_1", "P_el_2"]);
-    const pWpHeat = sum(data, ["P_heat_1", "P_heat_2"]);
-    const pR1 = sum(data, ["P_lat_A", "P_sen_B", "P_lat_C", "P_sen_D"]);
-    const pR2 = sum(data, ["P_lat_A_R2", "P_lat_C_R2", "P_sen_B_R2", "P_sen_D_R2"]);
-    const cop = avgPositive([data.COP_1, data.COP_2]);
-    const eer = avgPositive([data.EER_1, data.EER_2]);
+    const res = await fetch(`/.netlify/functions/data?${params.toString()}`);
+    if (!res.ok) {
+      throw new Error(`API ${res.status}`);
+    }
+    const rows = await res.json();
+    const latest = Array.isArray(rows) && rows.length ? rows[rows.length - 1] : null;
 
-    setText("identValue", String(data.ident || "-"));
-    setText("topicValue", topic);
-    setText("tsValue", String(data.ts || "-"));
+    if (!latest) {
+      setText("connState", "keine Daten im Zeitraum");
+      return;
+    }
+
+    render(latest);
+    setText("connState", "verbunden");
     setText("lastSeen", new Date().toLocaleString("de-DE"));
-
-    setMetric("P_Heat", data.P_Heat, "kW");
-    setMetric("P_Pool", data.P_Pool, "kW");
-    setMetric("P_WP_cool", pWpCool, "kW");
-    setMetric("P_WP_el", pWpEl, "kW");
-    setMetric("P_WP_heat", pWpHeat, "kW");
-    setMetric("P_R1", pR1, "kW");
-    setMetric("P_R2", pR2, "kW");
-    setMetric("COP", cop, "");
-    setMetric("EER", eer, "");
-    setMetric("T_2000l_top", data.T_2000l_top, "degC");
-    setMetric("T_VL_pool", data.T_VL_Pool, "degC");
-    setMetric("T_VL_heating", data.T_VL_heating, "degC");
-    setMetric("T_max_BIO", data.T_max_BIO, "degC");
-    setMetric("T_max_BIO_R2", data.T_max_BIO_R2, "degC");
   } catch (err) {
-    console.error("Fehler beim Parsen", err);
+    setText("connState", "api-fehler");
+    console.error("Live refresh failed", err);
   }
-});
+}
 
-function pickLhPayload(payload) {
-  if (!payload) return null;
-  if (Array.isArray(payload)) {
-    return payload.find((p) => p && p.ident === IDENT) || null;
-  }
-  if (payload.ident === IDENT) return payload;
-  return null;
+function render(data) {
+  const pWpCool = sum(data, ["P_cool_1", "P_cool_2"]);
+  const pWpEl = sum(data, ["P_el_1", "P_el_2"]);
+  const pWpHeat = sum(data, ["P_heat_1", "P_heat_2"]);
+  const pR1 = sum(data, ["P_lat_A", "P_sen_B", "P_lat_C", "P_sen_D"]);
+  const pR2 = sum(data, ["P_lat_A_R2", "P_lat_C_R2", "P_sen_B_R2", "P_sen_D_R2"]);
+  const cop = avgPositive([data.COP_1, data.COP_2]);
+  const eer = avgPositive([data.EER_1, data.EER_2]);
+
+  setText("identValue", String(data.ident || IDENT));
+  setText("topicValue", String(data.type || "value"));
+  setText("tsValue", String(data.ts || "-"));
+
+  setMetric("P_Heat", data.P_Heat, "kW");
+  setMetric("P_Pool", data.P_Pool, "kW");
+  setMetric("P_WP_cool", pWpCool, "kW");
+  setMetric("P_WP_el", pWpEl, "kW");
+  setMetric("P_WP_heat", pWpHeat, "kW");
+  setMetric("P_R1", pR1, "kW");
+  setMetric("P_R2", pR2, "kW");
+  setMetric("COP", cop, "");
+  setMetric("EER", eer, "");
+  setMetric("T_2000l_top", data.T_2000l_top, "degC");
+  setMetric("T_VL_pool", data.T_VL_Pool, "degC");
+  setMetric("T_VL_heating", data.T_VL_heating, "degC");
+  setMetric("T_max_BIO", data.T_max_BIO, "degC");
+  setMetric("T_max_BIO_R2", data.T_max_BIO_R2, "degC");
 }
 
 function sum(obj, keys) {
