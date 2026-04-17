@@ -12,7 +12,7 @@
       --hotel: #d4af37;
       --air: #1e3a8a;
       --pool: #3b82f6;
-      --card: rgba(10, 15, 28, 0.82);
+      --card: rgba(10, 15, 28, 0.66);
       --border: rgba(255, 255, 255, 0.22);
       --temp-border: #d62828;
       --temp-text: #ff9f1c;
@@ -93,8 +93,8 @@
 
     .box {
       position: absolute;
-      min-width: 138px;
-      max-width: min(33vw, 255px);
+      min-width: 132px;
+      max-width: min(32vw, 235px);
       background: var(--card);
       border: 1px solid var(--border);
       border-left: 6px solid #ffffff;
@@ -118,16 +118,18 @@
     .val { color: #f4f8ff; font-weight: 400; }
 
     .hotel { left: 10%; top: 15%; border-left-color: var(--hotel); }
-    .wp { left: 35%; top: 46%; border-left-color: #7f1d1d; min-width: 170px; }
-    .r1 { left: 51%; top: 56%; border-left-color: #a855f7; }
-    .r2 { left: 72%; top: 55%; border-left-color: #6d28d9; }
-    .air { left: 82%; top: 77%; border-left-color: var(--air); }
-    .pool { left: 2%; top: 54%; border-left-color: var(--pool); min-width: 128px; }
+    .wp { left: 31%; top: 45%; border-left-color: #7f1d1d; min-width: 154px; max-width: 180px; }
+    .r1 { left: 51%; top: 53%; border-left-color: #a855f7; }
+    .r2 { left: 72%; top: 54%; border-left-color: #6d28d9; }
+    .air { left: 84%; top: 77%; border-left-color: var(--air); min-width: 106px; max-width: 145px; }
+    .pool { left: 2%; top: 56%; border-left-color: var(--pool); min-width: 116px; max-width: 142px; }
 
     .temp {
       border: 1px solid var(--temp-border);
       border-left: 6px solid var(--temp-border);
-      background: rgba(55, 10, 10, 0.9);
+      background: rgba(55, 10, 10, 0.74);
+      min-width: 96px;
+      max-width: 142px;
     }
 
     .temp .name,
@@ -136,10 +138,12 @@
       font-weight: 400;
     }
 
-    .r1t { left: 52%; top: 50%; }
-    .r2t { left: 73%; top: 49%; }
-    .hotelt { left: 18%; top: 22%; }
-    .poolt { left: 2%; top: 62.5%; }
+    .r1t { left: 52%; top: 47%; }
+    .r2t { left: 73%; top: 48%; }
+    .hotelt { left: 14%; top: 22%; }
+    .poolt { left: 2%; top: 60.1%; }
+
+    .wp .title { font-weight: 700; }
 
     @media (max-width: 860px) {
       .scene { aspect-ratio: 3 / 4; }
@@ -153,15 +157,15 @@
       }
 
       .hotel { left: 6%; top: 9%; }
-      .wp { left: 24%; top: 39%; }
-      .r1 { left: 59%; top: 50%; }
-      .r2 { left: 60%; top: 63%; }
-      .air { left: 60%; top: 78%; }
-      .pool { left: 4%; top: 59%; }
-      .r1t { left: 63%; top: 44%; }
-      .r2t { left: 64%; top: 58%; }
-      .hotelt { left: 22%; top: 17%; }
-      .poolt { left: 4%; top: 67%; }
+      .wp { left: 19%; top: 37%; max-width: 37vw; min-width: 120px; }
+      .r1 { left: 59%; top: 46%; }
+      .r2 { left: 60%; top: 60%; }
+      .air { left: 66%; top: 78%; min-width: 95px; }
+      .pool { left: 4%; top: 61%; min-width: 104px; }
+      .r1t { left: 63%; top: 40%; }
+      .r2t { left: 64%; top: 54%; }
+      .hotelt { left: 15%; top: 17%; }
+      .poolt { left: 4%; top: 64%; }
 
       .flow-path { stroke-width: 1.1; }
     }
@@ -185,15 +189,15 @@
 
       <svg class="flow" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
         <defs>
-          <marker id="arrowHead" markerWidth="5" markerHeight="5" refX="4.6" refY="2.5" orient="auto">
-            <path d="M0,0 L5,2.5 L0,5 Z" fill="#e8eefc"></path>
+          <marker id="arrowHead" markerWidth="4" markerHeight="4" refX="3.6" refY="2" orient="auto">
+            <path d="M0,0 L4,2 L0,4 Z" fill="#e8eefc"></path>
           </marker>
         </defs>
-        <path class="flow-path" d="M86,79 Q67,63 43,49" marker-end="url(#arrowHead)"></path>
-        <path class="flow-path" d="M57,59 Q50,54 43,49" marker-end="url(#arrowHead)"></path>
-        <path class="flow-path" d="M78,58 Q59,53 43,49" marker-end="url(#arrowHead)"></path>
-        <path class="flow-path" d="M43,49 Q30,37 18,20" marker-end="url(#arrowHead)"></path>
-        <path class="flow-path" d="M43,49 Q24,54 8,57" marker-end="url(#arrowHead)"></path>
+        <path class="flow-path" d="M86,79 C75,73 59,61 41,50" marker-end="url(#arrowHead)"></path>
+        <path class="flow-path" d="M56,56 C52,55 47,53 41,50" marker-end="url(#arrowHead)"></path>
+        <path class="flow-path" d="M76,56 C65,54 52,52 41,50" marker-end="url(#arrowHead)"></path>
+        <path class="flow-path" d="M41,50 C30,42 23,32 15,21" marker-end="url(#arrowHead)"></path>
+        <path class="flow-path" d="M41,50 C28,54 18,58 8,59" marker-end="url(#arrowHead)"></path>
       </svg>
 
       <article class="box hotel">
