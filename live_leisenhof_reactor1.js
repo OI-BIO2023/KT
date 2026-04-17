@@ -56,6 +56,8 @@ function render(data) {
   const pWpHeat = sum(data, ["P_heat_1", "P_heat_2"]);
   const pR1 = sum(data, ["P_lat_A", "P_sen_B", "P_lat_C", "P_sen_D"]);
   const pR2 = sum(data, ["P_lat_A_R2", "P_lat_C_R2", "P_sen_B_R2", "P_sen_D_R2"]);
+  const pHeat = toNumber(data.P_Heat);
+  const pPool = toNumber(data.P_Pool);
   const pL = pWpEl > 0 ? (pWpHeat + pWpCool - pR1 - pR2) : 0;
 
   setMetric("technikPWpEl", pWpEl, "kW");
@@ -64,11 +66,17 @@ function render(data) {
   setMetric("r2Power", pR2, "kW");
   setMetric("r1Temp", data.T_max_BIO, "degC");
   setMetric("r2Temp", data.T_max_BIO_R2, "degC");
-  setMetric("hotelPHeat", data.P_Heat, "kW");
+  setMetric("hotelPHeat", pHeat, "kW");
   setMetric("hotelTVlHeat", data.T_VL_heating, "degC");
-  setMetric("poolPower", data.P_Pool, "kW");
+  setMetric("poolPower", pPool, "kW");
   setMetric("poolTemp", data.T_VL_Pool, "degC");
   setMetric("airPower", pL, "kW");
+
+  setFlowVisible("arrows-air", isNonZero(pL));
+  setFlowVisible("arrows-r1", isNonZero(pR1));
+  setFlowVisible("arrows-r2", isNonZero(pR2));
+  setFlowVisible("arrows-hotel", isNonZero(pHeat));
+  setFlowVisible("arrows-pool", isNonZero(pPool));
 }
 
 function sum(obj, keys) {
@@ -93,4 +101,14 @@ function setMetric(id, value, unit) {
 function setText(id, value) {
   const el = document.getElementById(id);
   if (el) el.textContent = value;
+}
+
+function isNonZero(value) {
+  return Math.abs(toNumber(value)) > 0.0001;
+}
+
+function setFlowVisible(id, visible) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.style.display = visible ? "" : "none";
 }
