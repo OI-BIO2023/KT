@@ -1,2 +1,8 @@
 [functions]
 node_bundler = "esbuild"
+
+[[redirects]]
+from = "/"
+to = "/live_leisenhof_reactor1.html"
+status = 302
+force = true
