@@ -112,7 +112,6 @@
     }
 
     .debug-label {
-      fill: #f8fafc;
       font-size: 1.05px;
       font-family: "Segoe UI", Arial, sans-serif;
       paint-order: stroke;
@@ -120,6 +119,12 @@
       stroke-width: 0.2;
       opacity: 0.95;
     }
+
+    .debug-label.p-air { fill: #60a5fa; }
+    .debug-label.p-r1 { fill: #a855f7; }
+    .debug-label.p-r2 { fill: #7c3aed; }
+    .debug-label.p-hotel { fill: #f59e0b; }
+    .debug-label.p-pool { fill: #38bdf8; }
 
     .box {
       position: absolute;
@@ -240,43 +245,43 @@
 
       <svg class="flow" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
         <defs>
-          <path id="path_air_wp" class="guide-path" d="M84,78 C72,84 52,74 33,47"></path>
-          <path id="path_r1_wp" class="guide-path" d="M56,55 C49,44 41,43 33,47"></path>
-          <path id="path_r2_wp" class="guide-path" d="M76,56 C68,42 52,38 33,47"></path>
-          <path id="path_wp_hotel" class="guide-path" d="M33,47 C28,40 22,30 18,24"></path>
-          <path id="path_wp_pool" class="guide-path" d="M33,47 C24,52 16,56 9,60"></path>
+          <path id="path_air_wp" class="guide-path" d="M84,68 C72,74 52,64 31,35"></path>
+          <path id="path_r1_wp" class="guide-path" d="M56,45 C49,34 41,33 33,37"></path>
+          <path id="path_r2_wp" class="guide-path" d="M76,46 C68,32 52,28 33,37"></path>
+          <path id="path_wp_hotel" class="guide-path" d="M35,35 C28,30 22,20 18,14"></path>
+          <path id="path_wp_pool" class="guide-path" d="M35,39 C24,42 16,46 9,50"></path>
         </defs>
 
-        <path class="debug-path p-air" d="M84,78 C72,84 52,74 33,47"></path>
-        <path class="debug-path p-r1" d="M56,55 C49,44 41,43 33,47"></path>
-        <path class="debug-path p-r2" d="M76,56 C68,42 52,38 33,47"></path>
-        <path class="debug-path p-hotel" d="M33,47 C28,40 22,30 18,24"></path>
-        <path class="debug-path p-pool" d="M33,47 C24,52 16,56 9,60"></path>
+        <path class="debug-path p-air" d="M84,68 C72,74 52,64 31,35"></path>
+        <path class="debug-path p-r1" d="M56,45 C49,34 41,33 33,37"></path>
+        <path class="debug-path p-r2" d="M76,46 C68,32 52,28 33,37"></path>
+        <path class="debug-path p-hotel" d="M35,35 C28,30 22,20 18,14"></path>
+        <path class="debug-path p-pool" d="M35,39 C24,42 16,46 9,50"></path>
 
-        <circle class="debug-point" cx="84" cy="78"></circle><text class="debug-label" x="84.6" y="77.1">A S(84,78)</text>
-        <circle class="debug-point" cx="72" cy="84"></circle><text class="debug-label" x="72.6" y="83.1">A C1(72,84)</text>
-        <circle class="debug-point" cx="52" cy="74"></circle><text class="debug-label" x="52.6" y="73.1">A C2(52,74)</text>
-        <circle class="debug-point" cx="33" cy="47"></circle><text class="debug-label" x="33.6" y="46.1">A E(33,47)</text>
+        <circle class="debug-point" cx="84" cy="68"></circle><text class="debug-label p-air" x="84.6" y="67.1">A S(84,68)</text>
+        <circle class="debug-point" cx="72" cy="74"></circle><text class="debug-label p-air" x="72.6" y="73.1">A C1(72,74)</text>
+        <circle class="debug-point" cx="52" cy="64"></circle><text class="debug-label p-air" x="52.6" y="63.1">A C2(52,64)</text>
+        <circle class="debug-point" cx="31" cy="35"></circle><text class="debug-label p-air" x="31.6" y="34.1">A E(31,35)</text>
 
-        <circle class="debug-point" cx="56" cy="55"></circle><text class="debug-label" x="56.6" y="54.1">R1 S(56,55)</text>
-        <circle class="debug-point" cx="49" cy="44"></circle><text class="debug-label" x="49.6" y="43.1">R1 C1(49,44)</text>
-        <circle class="debug-point" cx="41" cy="43"></circle><text class="debug-label" x="41.6" y="42.1">R1 C2(41,43)</text>
-        <circle class="debug-point" cx="33" cy="47"></circle><text class="debug-label" x="33.6" y="48.3">R1 E(33,47)</text>
+        <circle class="debug-point" cx="56" cy="45"></circle><text class="debug-label p-r1" x="56.6" y="44.1">R1 S(56,45)</text>
+        <circle class="debug-point" cx="49" cy="34"></circle><text class="debug-label p-r1" x="49.6" y="33.1">R1 C1(49,34)</text>
+        <circle class="debug-point" cx="41" cy="33"></circle><text class="debug-label p-r1" x="41.6" y="32.1">R1 C2(41,33)</text>
+        <circle class="debug-point" cx="33" cy="37"></circle><text class="debug-label p-r1" x="33.6" y="38.3">R1/R2 E(33,37)</text>
 
-        <circle class="debug-point" cx="76" cy="56"></circle><text class="debug-label" x="76.6" y="55.1">R2 S(76,56)</text>
-        <circle class="debug-point" cx="68" cy="42"></circle><text class="debug-label" x="68.6" y="41.1">R2 C1(68,42)</text>
-        <circle class="debug-point" cx="52" cy="38"></circle><text class="debug-label" x="52.6" y="37.1">R2 C2(52,38)</text>
-        <circle class="debug-point" cx="33" cy="47"></circle><text class="debug-label" x="29.8" y="49.2">R2 E(33,47)</text>
+        <circle class="debug-point" cx="76" cy="46"></circle><text class="debug-label p-r2" x="76.6" y="45.1">R2 S(76,46)</text>
+        <circle class="debug-point" cx="68" cy="32"></circle><text class="debug-label p-r2" x="68.6" y="31.1">R2 C1(68,32)</text>
+        <circle class="debug-point" cx="52" cy="28"></circle><text class="debug-label p-r2" x="52.6" y="27.1">R2 C2(52,28)</text>
+        <circle class="debug-point" cx="33" cy="37"></circle><text class="debug-label p-r2" x="29.2" y="40.1">R2 E(33,37)</text>
 
-        <circle class="debug-point" cx="33" cy="47"></circle><text class="debug-label" x="25.8" y="44.7">H S(33,47)</text>
-        <circle class="debug-point" cx="28" cy="40"></circle><text class="debug-label" x="28.6" y="39.1">H C1(28,40)</text>
-        <circle class="debug-point" cx="22" cy="30"></circle><text class="debug-label" x="22.6" y="29.1">H C2(22,30)</text>
-        <circle class="debug-point" cx="18" cy="24"></circle><text class="debug-label" x="18.6" y="23.1">H E(18,24)</text>
+        <circle class="debug-point" cx="35" cy="35"></circle><text class="debug-label p-hotel" x="27.8" y="32.7">H S(35,35)</text>
+        <circle class="debug-point" cx="28" cy="30"></circle><text class="debug-label p-hotel" x="28.6" y="29.1">H C1(28,30)</text>
+        <circle class="debug-point" cx="22" cy="20"></circle><text class="debug-label p-hotel" x="22.6" y="19.1">H C2(22,20)</text>
+        <circle class="debug-point" cx="18" cy="14"></circle><text class="debug-label p-hotel" x="18.6" y="13.1">H E(18,14)</text>
 
-        <circle class="debug-point" cx="33" cy="47"></circle><text class="debug-label" x="25.8" y="50.7">P S(33,47)</text>
-        <circle class="debug-point" cx="24" cy="52"></circle><text class="debug-label" x="24.6" y="51.1">P C1(24,52)</text>
-        <circle class="debug-point" cx="16" cy="56"></circle><text class="debug-label" x="16.6" y="55.1">P C2(16,56)</text>
-        <circle class="debug-point" cx="9" cy="60"></circle><text class="debug-label" x="9.6" y="59.1">P E(9,60)</text>
+        <circle class="debug-point" cx="35" cy="39"></circle><text class="debug-label p-pool" x="27.6" y="42.1">P S(35,39)</text>
+        <circle class="debug-point" cx="24" cy="42"></circle><text class="debug-label p-pool" x="24.6" y="41.1">P C1(24,42)</text>
+        <circle class="debug-point" cx="16" cy="46"></circle><text class="debug-label p-pool" x="16.6" y="45.1">P C2(16,46)</text>
+        <circle class="debug-point" cx="9" cy="50"></circle><text class="debug-label p-pool" x="9.6" y="49.1">P E(9,50)</text>
 
         <g class="arrow-glyph">
           <path d="M0,0 L-1.9,-1.2"></path><path d="M0,0 L-1.9,1.2"></path>
