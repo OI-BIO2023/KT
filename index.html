@@ -3,319 +3,276 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Leisenhof Monitoring</title>
+  <title>Leisenhof Historie</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <style>
     :root {
       color-scheme: dark;
-      --bg: #0f172a;
-      --card: #14223c;
+      --bg: #0b1220;
+      --panel: #12203a;
       --border: rgba(255, 255, 255, 0.12);
-      --muted: #94a3b8;
-      --accent: #22d3ee;
-      --accent-2: #a855f7;
+      --muted: #9fb0cc;
+      --text: #edf3ff;
+      --wp: #1fbf3d;
+      --r1: #7a2f1b;
+      --r2: #8d3b22;
+      --air: #1e3a8a;
+      --hotel: #d4af37;
+      --pool: #3b82f6;
+      --puffer: #6b7280;
     }
 
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
 
     body {
       margin: 0;
       font-family: "Space Grotesk", system-ui, sans-serif;
-      background: radial-gradient(circle at top right, rgba(34, 211, 238, 0.15), transparent 45%),
-        radial-gradient(circle at 20% 20%, rgba(168, 85, 247, 0.25), transparent 35%),
+      color: var(--text);
+      background:
+        radial-gradient(circle at 85% 8%, rgba(30, 58, 138, 0.22), transparent 40%),
+        radial-gradient(circle at 10% 12%, rgba(31, 191, 61, 0.15), transparent 38%),
         var(--bg);
-      color: white;
       min-height: 100vh;
-      padding: 2rem 1.5rem 3rem;
+      padding: 1.2rem;
     }
 
-    .page-header {
+    .shell {
+      max-width: 1260px;
+      margin: 0 auto;
+    }
+
+    .head {
       display: flex;
       align-items: flex-end;
       justify-content: space-between;
-      gap: 1rem;
-      margin-bottom: 1.5rem;
+      gap: 0.8rem;
+      margin-bottom: 1rem;
     }
 
-    .page-header h1 {
+    h1 {
       margin: 0;
-      font-size: clamp(2rem, 4vw, 2.8rem);
-      letter-spacing: 0.05em;
-    }
-
-    .page-header p {
-      margin: 0.2rem 0 0;
-      color: var(--muted);
+      font-size: clamp(1.5rem, 2.8vw, 2.3rem);
+      letter-spacing: 0.02em;
     }
 
     .last-update {
-      text-align: right;
       color: var(--muted);
+      text-align: right;
       font-size: 0.9rem;
     }
 
-    .controls-panel {
+    .controls {
       display: flex;
       flex-wrap: wrap;
-      gap: 1rem;
-      align-items: center;
-      margin-bottom: 1.5rem;
-      background: rgba(15, 23, 42, 0.7);
-      padding: 1rem;
-      border-radius: 1rem;
+      gap: 0.8rem;
+      align-items: end;
+      background: rgba(15, 23, 42, 0.72);
       border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 0.8rem;
+      margin-bottom: 1rem;
     }
 
-    .control-field {
+    .field {
       display: flex;
       flex-direction: column;
-      gap: 0.3rem;
-      font-size: 0.9rem;
+      gap: 0.24rem;
+      font-size: 0.86rem;
+      color: var(--muted);
     }
 
     input[type="datetime-local"] {
       background: #0f172a;
+      color: var(--text);
       border: 1px solid var(--border);
-      border-radius: 0.6rem;
-      padding: 0.45rem 0.75rem;
-      color: white;
+      border-radius: 8px;
+      padding: 0.42rem 0.62rem;
+      font-family: inherit;
     }
 
-    .controls-panel button,
-    .controls-panel a {
-      border-radius: 0.6rem;
+    button,
+    .live-link {
+      border-radius: 8px;
       border: none;
-      padding: 0.55rem 1rem;
+      padding: 0.5rem 0.9rem;
       font-weight: 600;
+      font-family: inherit;
       text-decoration: none;
-      transition: transform 0.15s ease, box-shadow 0.15s ease;
+      cursor: pointer;
     }
 
     #refreshButton {
-      background: linear-gradient(135deg, var(--accent), var(--accent-2));
-      color: #020617;
-      cursor: pointer;
-      border: none;
-    }
-
-    #refreshButton:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 10px 20px rgba(34, 211, 238, 0.35);
+      background: linear-gradient(135deg, #7cc3ff, #34d399);
+      color: #041022;
     }
 
     .live-link {
       border: 1px solid var(--border);
-      color: white;
+      color: var(--text);
+      background: rgba(15, 23, 42, 0.45);
+    }
+
+    .section {
+      margin-bottom: 1rem;
+    }
+
+    .section h2 {
+      margin: 0 0 0.54rem;
+      font-size: 1.12rem;
     }
 
     .stats-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 1rem;
-    }
-
-    .section {
-      margin-bottom: 1.5rem;
-    }
-
-    .section h2 {
-      margin: 0 0 0.7rem;
-      font-size: 1.25rem;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 0.72rem;
     }
 
     .stat-card {
-      background: var(--card);
+      background: var(--panel);
       border: 1px solid var(--border);
-      border-radius: 1rem;
-      padding: 1rem;
+      border-radius: 12px;
+      padding: 0.76rem;
+      min-height: 106px;
       display: flex;
       flex-direction: column;
-      gap: 0.35rem;
-      min-height: 120px;
+      gap: 0.28rem;
     }
 
-    .stat-card .stat-label {
-      font-size: 0.85rem;
+    .stat-label {
       color: var(--muted);
-      letter-spacing: 0.06em;
+      font-size: 0.82rem;
       text-transform: uppercase;
+      letter-spacing: 0.05em;
     }
 
-    .stat-card .stat-value {
-      font-size: 1.9rem;
-      font-weight: 600;
+    .stat-value {
+      font-size: 1.64rem;
+      font-weight: 700;
+      line-height: 1.1;
     }
 
-    .stat-card .stat-meta {
-      font-size: 0.85rem;
+    .stat-meta {
       color: var(--muted);
+      font-size: 0.82rem;
     }
 
-    .chart-block {
+    .charts {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 1rem;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 0.8rem;
     }
 
     .chart-card {
-      background: var(--card);
-      border-radius: 1rem;
+      background: var(--panel);
       border: 1px solid var(--border);
-      padding: 1rem;
-      min-height: 320px;
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+      border-radius: 12px;
+      padding: 0.8rem;
+      min-height: 340px;
+    }
+
+    .chart-card h3 {
+      margin: 0 0 0.35rem;
+      font-size: 1.02rem;
+      font-weight: 600;
     }
 
     .chart-card canvas {
       width: 100%;
-      height: 260px;
-    }
-
-    .chart-card h3 {
-      margin: 0 0 0.5rem;
-      font-size: 1.05rem;
-    }
-
-    .hidden {
-      display: none !important;
+      height: 275px;
     }
 
     #noDataMessage {
       color: var(--muted);
       text-align: center;
-      padding: 1rem 0;
+      margin-top: 0.5rem;
+      font-size: 0.9rem;
     }
 
-    @media (max-width: 600px) {
-      body {
-        padding: 1.25rem;
-      }
+    .hidden { display: none !important; }
 
-      .controls-panel {
+    @media (max-width: 760px) {
+      body { padding: 0.75rem; }
+      .head {
+        align-items: flex-start;
         flex-direction: column;
-        align-items: stretch;
+        gap: 0.25rem;
       }
+      .last-update { text-align: left; }
+      .controls { align-items: stretch; }
+      .charts { grid-template-columns: 1fr; }
+      .chart-card { min-height: 305px; }
+      .chart-card canvas { height: 245px; }
     }
   </style>
 </head>
 <body>
-  <header class="page-header">
-    <div>
-      <p>Netlify + AWS | Leisenhof (LH)</p>
-      <h1>Leisenhof Performance</h1>
-      <p>Heatpump telemetry und Pool-/Biomasse-Temperaturen in einem einzigen Blick.</p>
-    </div>
-    <div class="last-update">
-      <div>Letztes Update</div>
-      <div id="lastUpdated">–</div>
-    </div>
-  </header>
+  <main class="shell">
+    <header class="head">
+      <h1>Leisenhof Historie</h1>
+      <div class="last-update">
+        <div>Letztes Update</div>
+        <div id="lastUpdated">-</div>
+      </div>
+    </header>
 
-  <section class="controls-panel">
-    <div class="control-field">
-      <label for="startDateTime">Startzeit</label>
-      <input type="datetime-local" id="startDateTime" step="300" />
-    </div>
-    <div class="control-field">
-      <label for="endDateTime">Endzeit</label>
-      <input type="datetime-local" id="endDateTime" step="300" />
-    </div>
-    <button id="refreshButton" type="button">Aktualisieren</button>
-    <a class="live-link" href="live_leisenhof_reactor1.html">Live-Daten ansehen</a>
-  </section>
+    <section class="controls">
+      <div class="field">
+        <label for="startDateTime">Startzeit</label>
+        <input type="datetime-local" id="startDateTime" step="300" />
+      </div>
+      <div class="field">
+        <label for="endDateTime">Endzeit</label>
+        <input type="datetime-local" id="endDateTime" step="300" />
+      </div>
+      <button id="refreshButton" type="button">Aktualisieren</button>
+      <a class="live-link" href="live_leisenhof_reactor1.html">Live</a>
+    </section>
 
-  <section class="section">
-    <h2>Energie-Highlights</h2>
-    <div class="stats-grid" id="energyStats">
-      <article class="stat-card" id="copCard">
-        <span class="stat-label">durchschn. COP</span>
-        <span class="stat-value" id="copValue">–</span>
-        <span class="stat-meta">Nur bei Heizbetrieb sichtbar</span>
-      </article>
-      <article class="stat-card hidden" id="eerCard">
-        <span class="stat-label">mittlerer EER</span>
-        <span class="stat-value" id="eerValue">–</span>
-        <span class="stat-meta">Nur bei Kühlbetrieb sichtbar</span>
-      </article>
-      <article class="stat-card" id="coolingCard">
-        <span class="stat-label">P_WP_cool</span>
-        <span class="stat-value" id="coolingValue">–</span>
-        <span class="stat-meta">Positiv = aktive Kühlung</span>
-      </article>
-      <article class="stat-card" id="heatCard">
-        <span class="stat-label">P_WP_heat</span>
-        <span class="stat-value" id="heatValue">–</span>
-        <span class="stat-meta">Ausgeblendet bei Kühlung</span>
-      </article>
-      <article class="stat-card" id="electricCard">
-        <span class="stat-label">P_WP_el</span>
-        <span class="stat-value" id="electricValue">–</span>
-        <span class="stat-meta">Wärmepumpen-Grid</span>
-      </article>
-      <article class="stat-card" id="poolCard">
-        <span class="stat-label">P_Pool</span>
-        <span class="stat-value" id="poolValue">–</span>
-        <span class="stat-meta">Poolladeleistung</span>
-      </article>
-      <article class="stat-card" id="r1Card">
-        <span class="stat-label">P_R1</span>
-        <span class="stat-value" id="r1Value">–</span>
-        <span class="stat-meta">Reaktor 1</span>
-      </article>
-      <article class="stat-card" id="r2Card">
-        <span class="stat-label">P_R2</span>
-        <span class="stat-value" id="r2Value">–</span>
-        <span class="stat-meta">Reaktor 2</span>
-      </article>
-    </div>
-  </section>
+    <section class="section">
+      <h2>Energie-Highlights</h2>
+      <div class="stats-grid">
+        <article class="stat-card">
+          <span class="stat-label">Durchschnitt COP</span>
+          <span class="stat-value" id="copValue">-</span>
+          <span class="stat-meta">Nur bei Heizbetrieb</span>
+        </article>
+        <article class="stat-card">
+          <span class="stat-label">Summe Leistung Reaktor 1</span>
+          <span class="stat-value" id="sumR1Value">-</span>
+          <span class="stat-meta">Integral als Energie</span>
+        </article>
+        <article class="stat-card">
+          <span class="stat-label">Summe Leistung Reaktor 2</span>
+          <span class="stat-value" id="sumR2Value">-</span>
+          <span class="stat-meta">Integral als Energie</span>
+        </article>
+        <article class="stat-card">
+          <span class="stat-label">Summe Leistung Luft</span>
+          <span class="stat-value" id="sumLValue">-</span>
+          <span class="stat-meta">Integral als Energie</span>
+        </article>
+        <article class="stat-card">
+          <span class="stat-label">Max Temperatur R1 / R2</span>
+          <span class="stat-value" id="tMaxPairValue">-</span>
+          <span class="stat-meta">Zeitraum-Maxima</span>
+        </article>
+      </div>
+    </section>
 
-  <section class="section">
-    <h2>Temperatur-Status</h2>
-    <div class="stats-grid">
-      <article class="stat-card">
-        <span class="stat-label">T_2000l_top</span>
-        <span class="stat-value" id="tTankValue">–</span>
-        <span class="stat-meta">Puffer oben</span>
+    <section class="charts">
+      <article class="chart-card">
+        <h3>Leistungen</h3>
+        <canvas id="energyChart"></canvas>
+        <p id="noDataMessage" class="hidden">Keine Messwerte im ausgew&auml;hlten Zeitraum.</p>
       </article>
-      <article class="stat-card">
-        <span class="stat-label">T_VL_pool</span>
-        <span class="stat-value" id="tPoolValue">–</span>
-        <span class="stat-meta">Vorlauf Pool</span>
+      <article class="chart-card">
+        <h3>Temperaturen</h3>
+        <canvas id="tempChart"></canvas>
       </article>
-      <article class="stat-card">
-        <span class="stat-label">T_VL_heating</span>
-        <span class="stat-value" id="tHeatingValue">–</span>
-        <span class="stat-meta">Vorlauf Heizung</span>
-      </article>
-      <article class="stat-card">
-        <span class="stat-label">T_max_BIO</span>
-        <span class="stat-value" id="tBioValue">–</span>
-        <span class="stat-meta">Biomasse R1</span>
-      </article>
-      <article class="stat-card">
-        <span class="stat-label">T_max_BIO_R2</span>
-        <span class="stat-value" id="tBio2Value">–</span>
-        <span class="stat-meta">Biomasse R2</span>
-      </article>
-    </div>
-  </section>
-
-  <section class="chart-block">
-    <div class="chart-card">
-      <h3>Leistungsübersicht</h3>
-      <canvas id="energyChart"></canvas>
-      <p id="noDataMessage" class="hidden">Keine Messwerte im ausgewählten Zeitraum.</p>
-    </div>
-    <div class="chart-card">
-      <h3>Temperaturtrend</h3>
-      <canvas id="tempChart"></canvas>
-    </div>
-  </section>
+    </section>
+  </main>
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/luxon@3/build/global/luxon.min.js"></script>

@@ -1,75 +1,62 @@
 const IDENT = "LH";
+const WP_DIVISOR = 10;
+const WP_SCALE_KEYS = new Set(["P_heat_1", "P_cool_1", "P_el_1", "P_heat_2", "P_cool_2", "P_el_2"]);
+const COLORS = {
+  wp: "#1fbf3d",
+  r1: "#7a2f1b",
+  r2: "#8d3b22",
+  air: "#1e3a8a",
+  hotel: "#d4af37",
+  pool: "#3b82f6",
+  puffer: "#6b7280",
+};
+
 let energyChart;
 let tempChart;
 
-const elementIds = {
-  copValue: "copValue",
-  eerValue: "eerValue",
-  coolingValue: "coolingValue",
-  heatValue: "heatValue",
-  electricValue: "electricValue",
-  poolValue: "poolValue",
-  r1Value: "r1Value",
-  r2Value: "r2Value",
-  tTankValue: "tTankValue",
-  tPoolValue: "tPoolValue",
-  tHeatingValue: "tHeatingValue",
-  tBioValue: "tBioValue",
-  tBio2Value: "tBio2Value",
-  lastUpdated: "lastUpdated",
-  energyChart: "energyChart",
-  tempChart: "tempChart",
-  noDataMessage: "noDataMessage",
-  copCard: "copCard",
-  eerCard: "eerCard",
-  heatCard: "heatCard",
-};
-
 document.addEventListener("DOMContentLoaded", () => {
   initializeDateInputs();
-  document.getElementById("refreshButton").addEventListener("click", () => loadData());
+  document.getElementById("refreshButton").addEventListener("click", loadData);
   loadData();
 });
 
 async function loadData() {
   const { start, end } = getFilterValues();
-  showLoadingState(true);
+  setLoadingState(true);
 
   try {
     const raw = await fetchData(start, end);
     const normalized = normalizeData(raw);
-    const latest = normalized[normalized.length - 1];
-
     renderEnergyChart(normalized);
     renderTempChart(normalized);
-    updateStats(latest);
+    updateHighlights(normalized);
     toggleNoData(normalized.length === 0);
   } catch (err) {
-    console.error("Fehler beim Laden der Daten:", err);
+    console.error("Fehler beim Laden der Historie:", err);
     toggleNoData(true);
   } finally {
-    showLoadingState(false);
+    setLoadingState(false);
   }
 }
 
 function initializeDateInputs() {
   const endDate = new Date();
-  const startDate = new Date(endDate);
-  startDate.setHours(endDate.getHours() - 24);
+  const startDate = new Date(endDate.getTime() - 24 * 60 * 60 * 1000);
   document.getElementById("startDateTime").value = formatDateTimeLocal(startDate);
   document.getElementById("endDateTime").value = formatDateTimeLocal(endDate);
 }
 
-function showLoadingState(isLoading) {
-  const button = document.getElementById("refreshButton");
-  button.textContent = isLoading ? "Lädt…" : "Aktualisieren";
-  button.disabled = isLoading;
+function getFilterValues() {
+  return {
+    start: document.getElementById("startDateTime").value,
+    end: document.getElementById("endDateTime").value,
+  };
 }
 
-function getFilterValues() {
-  const start = document.getElementById("startDateTime").value;
-  const end = document.getElementById("endDateTime").value;
-  return { start, end };
+function setLoadingState(isLoading) {
+  const button = document.getElementById("refreshButton");
+  button.textContent = isLoading ? "Laedt..." : "Aktualisieren";
+  button.disabled = isLoading;
 }
 
 async function fetchData(start, end) {
@@ -77,72 +64,296 @@ async function fetchData(start, end) {
   const endIso = toIsoOrFallback(end, false);
   const params = new URLSearchParams({
     ident: IDENT,
+    type: "value",
     start: startIso,
     end: endIso,
   });
+
   const res = await fetch(`/.netlify/functions/data?${params.toString()}`);
   if (!res.ok) {
-    const text = await res.text();
-    throw new Error(`API-Fehler (${res.status}): ${text}`);
+    throw new Error(`API ${res.status}`);
   }
   return res.json();
 }
 
-function normalizeData(data) {
-  const normalized = data
-    .map((item) => {
-      const time = parseTimestamp(item);
-      const copValues = filterPositive([item.COP_1, item.COP_2]);
-      const eerValues = filterPositive([item.EER_1, item.EER_2]);
-      const pWpCool = sumFields(item, ["P_cool_1", "P_cool_2"]);
-      const pWpHeat = sumFields(item, ["P_heat_1", "P_heat_2"]);
-      const pWpEl = sumFields(item, ["P_el_1", "P_el_2"]);
+function normalizeData(items) {
+  const normalized = items
+    .map((row) => {
+      const time = parseTimestamp(row);
+      if (!time) return null;
+
+      const scaled = maybeScaleWpValues(row);
+      const pWp1Heat = toNumber(scaled.P_heat_1);
+      const pWp2Heat = toNumber(scaled.P_heat_2);
+      const pWp1Cool = toNumber(scaled.P_cool_1);
+      const pWp2Cool = toNumber(scaled.P_cool_2);
+      const pWp1El = toNumber(scaled.P_el_1);
+      const pWp2El = toNumber(scaled.P_el_2);
+
+      const pWpHeat = pWp1Heat + pWp2Heat;
+      const pWpCool = pWp1Cool + pWp2Cool;
+      const pWpEl = pWp1El + pWp2El;
+      const pR1 = sumFields(scaled, ["P_lat_A", "P_sen_B", "P_lat_C", "P_sen_D"]);
+      const pR2 = sumFields(scaled, ["P_lat_A_R2", "P_lat_C_R2", "P_sen_B_R2", "P_sen_D_R2"]);
+      const pL = pWpEl > 0 ? (pWpHeat + pWpCool - pR1 - pR2) : 0;
+      const cop = averagePositive([scaled.COP_1, scaled.COP_2]);
 
       return {
         time,
-        COP: copValues.length ? average(copValues) : null,
-        EER: eerValues.length ? average(eerValues) : null,
-        P_Heat: toNumber(item.P_Heat),
-        P_Pool: toNumber(item.P_Pool),
-        P_WP_cool: pWpCool,
-        P_WP_el: pWpEl,
-        P_WP_heat: pWpHeat,
-        P_R1: sumFields(item, ["P_lat_A", "P_sen_B", "P_lat_C", "P_sen_D"]),
-        P_R2: sumFields(item, ["P_lat_A_R2", "P_lat_C_R2", "P_sen_B_R2", "P_sen_D_R2"]),
-        T_2000l_top: toNumber(item.T_2000l_top),
-        T_VL_pool: toNumber(item.T_VL_Pool),
-        T_VL_heating: toNumber(item.T_VL_heating),
-        T_max_BIO: toNumber(item.T_max_BIO),
-        T_max_BIO_R2: toNumber(item.T_max_BIO_R2),
+        COP: cop,
+        P_WP1: pWp1Heat + pWp1Cool,
+        P_WP2: pWp2Heat + pWp2Cool,
+        P_R1: pR1,
+        P_R2: pR2,
+        P_L: pL,
+        T_VL_hotel: toNumber(scaled.T_VL_heating),
+        T_VL_pool: toNumber(scaled.T_VL_Pool),
+        T_puffer_2000l: toNumber(scaled.T_2000l_top),
+        T_max_R1: toNumber(scaled.T_max_BIO),
+        T_max_R2: toNumber(scaled.T_max_BIO_R2),
       };
     })
-    .filter((entry) => entry.time)
+    .filter(Boolean)
     .sort((a, b) => a.time - b.time);
 
   return normalized;
 }
 
+function maybeScaleWpValues(row) {
+  const copy = { ...row };
+  const maybeUnscaled = Math.max(
+    Math.abs(toNumber(copy.P_heat_1)),
+    Math.abs(toNumber(copy.P_heat_2)),
+    Math.abs(toNumber(copy.P_el_1)),
+    Math.abs(toNumber(copy.P_el_2))
+  );
+
+  if (maybeUnscaled > 120) {
+    for (const key of WP_SCALE_KEYS) {
+      if (key in copy) copy[key] = toNumber(copy[key]) / WP_DIVISOR;
+    }
+  }
+  return copy;
+}
+
 function parseTimestamp(item) {
-  if (item.ts) {
-    return new Date(item.ts);
-  }
-  if (item.server && item.server.timestamp) {
-    return new Date(item.server.timestamp * 1000);
-  }
-  if (item.timestamp) {
-    return new Date(item.timestamp * 1000);
-  }
-  return null;
+  const d = item?.ts ? new Date(item.ts) : null;
+  return d && !Number.isNaN(d.getTime()) ? d : null;
 }
 
-function filterPositive(values) {
-  return values
-    .map((value) => toNumber(value))
-    .filter((num) => num > 0);
+function renderEnergyChart(points) {
+  const ctx = document.getElementById("energyChart").getContext("2d");
+
+  const datasets = [
+    {
+      type: "line",
+      label: "Leistung Waermepumpe 1",
+      data: points.map((p) => ({ x: p.time, y: p.P_WP1 })),
+      borderColor: COLORS.wp,
+      backgroundColor: "rgba(31,191,61,0.38)",
+      fill: "origin",
+      tension: 0.22,
+      pointRadius: 0,
+      borderWidth: 2,
+      stack: "wp",
+    },
+    {
+      type: "line",
+      label: "Leistung Waermepumpe 2",
+      data: points.map((p) => ({ x: p.time, y: p.P_WP2 })),
+      borderColor: "#2fd95a",
+      backgroundColor: "rgba(47,217,90,0.28)",
+      fill: "-1",
+      tension: 0.22,
+      pointRadius: 0,
+      borderWidth: 2,
+      stack: "wp",
+    },
+    {
+      type: "line",
+      label: "Leistung Reaktor 1",
+      data: points.map((p) => ({ x: p.time, y: p.P_R1 })),
+      borderColor: COLORS.r1,
+      backgroundColor: COLORS.r1,
+      fill: false,
+      tension: 0.22,
+      pointRadius: 0,
+      borderWidth: 2,
+    },
+    {
+      type: "line",
+      label: "Leistung Reaktor 2",
+      data: points.map((p) => ({ x: p.time, y: p.P_R2 })),
+      borderColor: COLORS.r2,
+      backgroundColor: COLORS.r2,
+      fill: false,
+      tension: 0.22,
+      pointRadius: 0,
+      borderWidth: 2,
+    },
+    {
+      type: "line",
+      label: "Leistung Luft",
+      data: points.map((p) => ({ x: p.time, y: p.P_L })),
+      borderColor: COLORS.air,
+      backgroundColor: COLORS.air,
+      fill: false,
+      tension: 0.22,
+      pointRadius: 0,
+      borderWidth: 2.2,
+    },
+  ];
+
+  if (energyChart) energyChart.destroy();
+  energyChart = new Chart(ctx, {
+    type: "line",
+    data: { datasets },
+    options: buildChartOptions("Leistung (kW)", "kW"),
+  });
 }
 
-function sumFields(item, keys) {
-  return keys.reduce((acc, key) => acc + toNumber(item[key]), 0);
+function renderTempChart(points) {
+  const ctx = document.getElementById("tempChart").getContext("2d");
+
+  const datasets = [
+    {
+      label: "Temperatur VL Hotel",
+      data: points.map((p) => ({ x: p.time, y: p.T_VL_hotel })),
+      borderColor: COLORS.hotel,
+      backgroundColor: COLORS.hotel,
+    },
+    {
+      label: "Temperatur VL Pool",
+      data: points.map((p) => ({ x: p.time, y: p.T_VL_pool })),
+      borderColor: COLORS.pool,
+      backgroundColor: COLORS.pool,
+    },
+    {
+      label: "Temperatur Puffer 2000 l",
+      data: points.map((p) => ({ x: p.time, y: p.T_puffer_2000l })),
+      borderColor: COLORS.puffer,
+      backgroundColor: COLORS.puffer,
+    },
+    {
+      label: "Temperatur Max R1",
+      data: points.map((p) => ({ x: p.time, y: p.T_max_R1 })),
+      borderColor: COLORS.r1,
+      backgroundColor: COLORS.r1,
+    },
+    {
+      label: "Temperatur Max R2",
+      data: points.map((p) => ({ x: p.time, y: p.T_max_R2 })),
+      borderColor: COLORS.r2,
+      backgroundColor: COLORS.r2,
+    },
+  ].map((d) => ({
+    ...d,
+    fill: false,
+    tension: 0.22,
+    pointRadius: 0,
+    borderWidth: 2,
+  }));
+
+  if (tempChart) tempChart.destroy();
+  tempChart = new Chart(ctx, {
+    type: "line",
+    data: { datasets },
+    options: buildChartOptions("Temperatur (°C)", "°C"),
+  });
+}
+
+function buildChartOptions(yTitle, unit) {
+  return {
+    responsive: true,
+    maintainAspectRatio: false,
+    interaction: { intersect: false, mode: "index" },
+    scales: {
+      x: {
+        type: "time",
+        time: { tooltipFormat: "dd.MM. HH:mm" },
+        ticks: { color: "#c9d6ee" },
+        grid: { color: "rgba(255,255,255,0.08)" },
+        title: { display: true, text: "Zeit", color: "#b4c3de" },
+      },
+      y: {
+        ticks: { color: "#c9d6ee" },
+        grid: { color: "rgba(255,255,255,0.08)" },
+        title: { display: true, text: yTitle, color: "#b4c3de" },
+      },
+    },
+    plugins: {
+      legend: { labels: { color: "#e4ecfb" } },
+      tooltip: {
+        callbacks: {
+          label: (ctx) => `${ctx.dataset.label}: ${formatNumber(ctx.parsed.y)} ${unit}`,
+        },
+      },
+    },
+  };
+}
+
+function updateHighlights(points) {
+  const latest = points[points.length - 1];
+  setText("lastUpdated", latest ? formatTime(latest.time) : "-");
+
+  if (!points.length) {
+    setText("copValue", "-");
+    setText("sumR1Value", "-");
+    setText("sumR2Value", "-");
+    setText("sumLValue", "-");
+    setText("tMaxPairValue", "-");
+    return;
+  }
+
+  const copAvg = average(points.map((p) => p.COP).filter((v) => Number.isFinite(v) && v > 0));
+  const r1Kwh = integrateKwh(points, "P_R1");
+  const r2Kwh = integrateKwh(points, "P_R2");
+  const lKwh = integrateKwh(points, "P_L");
+  const tMaxR1 = maxOf(points, "T_max_R1");
+  const tMaxR2 = maxOf(points, "T_max_R2");
+
+  setText("copValue", Number.isFinite(copAvg) ? formatNumber(copAvg) : "-");
+  setText("sumR1Value", `${formatNumber(r1Kwh)} kWh`);
+  setText("sumR2Value", `${formatNumber(r2Kwh)} kWh`);
+  setText("sumLValue", `${formatNumber(lKwh)} kWh`);
+  setText("tMaxPairValue", `${formatNumber(tMaxR1)} °C / ${formatNumber(tMaxR2)} °C`);
+}
+
+function integrateKwh(points, key) {
+  if (points.length < 2) return 0;
+  let sum = 0;
+  for (let i = 1; i < points.length; i += 1) {
+    const prev = points[i - 1];
+    const cur = points[i];
+    const dtHours = (cur.time - prev.time) / 3600000;
+    if (!Number.isFinite(dtHours) || dtHours <= 0) continue;
+    const y0 = toNumber(prev[key]);
+    const y1 = toNumber(cur[key]);
+    sum += ((y0 + y1) / 2) * dtHours;
+  }
+  return sum;
+}
+
+function maxOf(points, key) {
+  let m = Number.NEGATIVE_INFINITY;
+  for (const p of points) {
+    const v = toNumber(p[key]);
+    if (v > m) m = v;
+  }
+  return Number.isFinite(m) ? m : 0;
+}
+
+function sumFields(obj, keys) {
+  return keys.reduce((acc, key) => acc + toNumber(obj[key]), 0);
+}
+
+function averagePositive(values) {
+  return average(values.map(toNumber).filter((v) => v > 0));
+}
+
+function average(values) {
+  if (!values.length) return NaN;
+  return values.reduce((a, b) => a + b, 0) / values.length;
 }
 
 function toNumber(value) {
@@ -150,212 +361,41 @@ function toNumber(value) {
   return Number.isFinite(num) ? num : 0;
 }
 
-function average(values) {
-  if (!values.length) return 0;
-  return values.reduce((sum, val) => sum + val, 0) / values.length;
-}
-
-function renderEnergyChart(data) {
-  const ctx = document.getElementById(elementIds.energyChart).getContext("2d");
-  const datasetConfig = [
-    { key: "P_Heat", label: "P_Heat", color: "#22d3ee" },
-    { key: "P_Pool", label: "P_Pool", color: "#a855f7" },
-    { key: "P_WP_cool", label: "P_WP_cool", color: "#fb7185" },
-    { key: "P_WP_el", label: "P_WP_el", color: "#facc15" },
-    { key: "P_WP_heat", label: "P_WP_heat", color: "#10b981" },
-    { key: "P_R1", label: "P_R1", color: "#f97316" },
-    { key: "P_R2", label: "P_R2", color: "#c084fc" },
-  ];
-
-  const datasets = datasetConfig.map(({ key, label, color }) => ({
-    label,
-    borderColor: color,
-    backgroundColor: color,
-    data: data.map((point) => ({ x: point.time, y: point[key] })),
-    fill: false,
-    tension: 0.25,
-    pointRadius: 1.5,
-    borderWidth: 2,
-  }));
-
-  if (energyChart) {
-    energyChart.destroy();
-  }
-
-  energyChart = new Chart(ctx, {
-    type: "line",
-    data: { datasets },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      interaction: {
-        intersect: false,
-        mode: "index",
-      },
-      scales: {
-        x: {
-          type: "time",
-          time: {
-            unit: "hour",
-            tooltipFormat: "dd.MM. HH:mm",
-          },
-          title: { display: true, text: "Zeit" },
-          ticks: { color: "#cbd5f5" },
-          grid: { color: "rgba(255,255,255,0.08)" },
-        },
-        y: {
-          title: { display: true, text: "Leistung (kW)" },
-          ticks: { color: "#cbd5f5" },
-          grid: { color: "rgba(255,255,255,0.08)" },
-        },
-      },
-      plugins: {
-        legend: { position: "top", labels: { color: "#e2e8f0" } },
-        tooltip: { callbacks: { label: (ctx) => `${ctx.dataset.label}: ${ctx.parsed.y.toFixed(1)} kW` } },
-      },
-    },
-  });
-}
-
-function renderTempChart(data) {
-  const ctx = document.getElementById(elementIds.tempChart).getContext("2d");
-  const temps = [
-    { key: "T_2000l_top", label: "T_2000l_top", color: "#22d3ee" },
-    { key: "T_VL_pool", label: "T_VL_pool", color: "#a855f7" },
-    { key: "T_VL_heating", label: "T_VL_heating", color: "#f97316" },
-    { key: "T_max_BIO", label: "T_max_BIO", color: "#facc15" },
-    { key: "T_max_BIO_R2", label: "T_max_BIO_R2", color: "#34d399" },
-  ];
-
-  const datasets = temps.map(({ key, label, color }) => ({
-    label,
-    borderColor: color,
-    backgroundColor: color,
-    data: data.map((point) => ({ x: point.time, y: point[key] })),
-    fill: false,
-    tension: 0.25,
-    pointRadius: 2,
-    borderWidth: 2,
-  }));
-
-  if (tempChart) {
-    tempChart.destroy();
-  }
-
-  tempChart = new Chart(ctx, {
-    type: "line",
-    data: { datasets },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      interaction: {
-        mode: "nearest",
-        intersect: false,
-      },
-      scales: {
-        x: {
-          type: "time",
-          time: {
-            tooltipFormat: "dd.MM. HH:mm",
-          },
-          ticks: { color: "#cbd5f5" },
-          grid: { color: "rgba(255,255,255,0.08)" },
-        },
-        y: {
-          title: { display: true, text: "Temperatur (°C)" },
-          ticks: { color: "#cbd5f5" },
-          grid: { color: "rgba(255,255,255,0.08)" },
-        },
-      },
-      plugins: {
-        legend: { position: "top", labels: { color: "#e2e8f0" } },
-      },
-    },
-  });
-}
-
-function updateStats(latest) {
-  const noData = !latest;
-  const copCard = document.getElementById(elementIds.copCard);
-  const eerCard = document.getElementById(elementIds.eerCard);
-  const heatCard = document.getElementById(elementIds.heatCard);
-
-  setText(elementIds.lastUpdated, latest ? formatTime(latest.time) : "–");
-  setText(elementIds.copValue, latest && latest.COP ? formatDecimal(latest.COP) : "–");
-  setText(elementIds.eerValue, latest && latest.EER ? formatDecimal(latest.EER) : "–");
-  setText(elementIds.coolingValue, latest ? formatDelta(latest.P_WP_cool) : "–");
-  setText(elementIds.heatValue, latest ? formatDelta(latest.P_WP_heat) : "–");
-  setText(elementIds.electricValue, latest ? formatDelta(latest.P_WP_el) : "–");
-  setText(elementIds.poolValue, latest ? formatPower(latest.P_Pool) : "–");
-  setText(elementIds.r1Value, latest ? formatPower(latest.P_R1) : "–");
-  setText(elementIds.r2Value, latest ? formatPower(latest.P_R2) : "–");
-  setText(elementIds.tTankValue, latest ? formatTemperature(latest.T_2000l_top) : "–");
-  setText(elementIds.tPoolValue, latest ? formatTemperature(latest.T_VL_pool) : "–");
-  setText(elementIds.tHeatingValue, latest ? formatTemperature(latest.T_VL_heating) : "–");
-  setText(elementIds.tBioValue, latest ? formatTemperature(latest.T_max_BIO) : "–");
-  setText(elementIds.tBio2Value, latest ? formatTemperature(latest.T_max_BIO_R2) : "–");
-
-  const coolingActive = latest && latest.P_WP_cool > 0;
-  copCard.classList.toggle("hidden", coolingActive || noData);
-  eerCard.classList.toggle("hidden", !coolingActive || noData);
-  heatCard.classList.toggle("hidden", coolingActive || noData);
-}
-
-function toggleNoData(show) {
-  const element = document.getElementById(elementIds.noDataMessage);
-  element.classList.toggle("hidden", !show);
+function formatNumber(value) {
+  const num = Number(value);
+  return Number.isFinite(num) ? num.toFixed(1) : "-";
 }
 
 function setText(id, value) {
   const el = document.getElementById(id);
-  if (el) {
-    el.textContent = value;
-  }
+  if (el) el.textContent = value;
 }
 
-function formatPower(value) {
-  return `${formatDelta(value)} kW`;
-}
-
-function formatDelta(value) {
-  const num = Number(value);
-  if (!Number.isFinite(num)) return "–";
-  return (num >= 0 ? "+" : "") + num.toFixed(1);
-}
-
-function formatTemperature(value) {
-  const num = Number(value);
-  return Number.isFinite(num) ? `${num.toFixed(1)} °C` : "–";
-}
-
-function formatDecimal(value) {
-  const num = Number(value);
-  return Number.isFinite(num) ? num.toFixed(2) : "–";
+function toggleNoData(show) {
+  const el = document.getElementById("noDataMessage");
+  if (el) el.classList.toggle("hidden", !show);
 }
 
 function formatTime(date) {
   return new Intl.DateTimeFormat("de-DE", {
-    hour: "2-digit",
-    minute: "2-digit",
     day: "2-digit",
     month: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
   }).format(date);
 }
 
 function formatDateTimeLocal(date) {
   const offset = date.getTimezoneOffset();
-  const local = new Date(date.getTime() - offset * 60 * 1000);
+  const local = new Date(date.getTime() - offset * 60000);
   return local.toISOString().slice(0, 16);
 }
 
 function toIsoOrFallback(value, isStart) {
   const parsed = new Date(value);
   if (!Number.isNaN(parsed.getTime())) {
-    if (isStart) {
-      parsed.setSeconds(0, 0);
-    } else {
-      parsed.setSeconds(59, 999);
-    }
+    if (isStart) parsed.setSeconds(0, 0);
+    else parsed.setSeconds(59, 999);
     return parsed.toISOString();
   }
   return value;

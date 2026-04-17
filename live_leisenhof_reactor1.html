@@ -236,6 +236,33 @@
         min-width: 0;
       }
     }
+
+    @media (max-width: 760px) {
+      .scene { border-radius: 10px; }
+
+      .box {
+        padding: 0.34rem 0.44rem;
+        font-size: clamp(13px, 3.4vw, 16px);
+        line-height: 1.08;
+      }
+
+      .hotel { min-width: 122px; max-width: 142px; }
+      .pool { min-width: 122px; max-width: 142px; }
+      .r1 { min-width: 134px; max-width: 152px; }
+      .r2 { min-width: 134px; max-width: 152px; }
+      .wp { min-width: 152px; max-width: 170px; }
+      .air { min-width: 114px; max-width: 128px; }
+      .temp { min-width: 66px; max-width: 74px; padding: 0.18rem 0.3rem; }
+      .pair .temp { margin-right: -6px; }
+      .temp .line { gap: 0.08rem; }
+
+      .hotel-pair { left: 1.8%; top: 6.2%; }
+      .r1-pair { left: 46.8%; top: 36.5%; }
+      .r2-pair { left: 69.8%; top: 30.2%; }
+      .pool-pair { left: 1.2%; top: 70.2%; transform: none; }
+      .wp { left: 30.5%; top: 57.2%; }
+      .air { left: 76.2%; top: 85.4%; }
+    }
   </style>
 </head>
 <body>
@@ -247,7 +274,7 @@
           <span>Status: <strong id="connState">warte auf API...</strong></span>
           <span>Letztes Update: <strong id="lastSeen">-</strong></span>
         </div>
-        <div class="link-row"><a href="/index.html">Historie</a></div>
+        <div class="link-row"><a href="index.html">Historie</a></div>
       </div>
     </header>
 
