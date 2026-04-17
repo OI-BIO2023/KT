@@ -1,5 +1,6 @@
 const IDENT = "LH";
 const POLL_MS = 10000;
+const LOOKBACK_WINDOWS_HOURS = [1, 24, 24 * 7];
 
 bootstrap();
 
@@ -10,8 +11,26 @@ function bootstrap() {
 
 async function refresh() {
   try {
-    const end = new Date();
-    const start = new Date(end.getTime() - 60 * 60 * 1000);
+    const latest = await fetchLatestValueRecord();
+
+    if (!latest) {
+      setText("connState", "keine Daten gefunden");
+      return;
+    }
+
+    render(latest);
+    setText("connState", "verbunden");
+    setText("lastSeen", new Date().toLocaleString("de-DE"));
+  } catch (err) {
+    setText("connState", "api-fehler");
+    console.error("Live refresh failed", err);
+  }
+}
+
+async function fetchLatestValueRecord() {
+  const end = new Date();
+  for (const hours of LOOKBACK_WINDOWS_HOURS) {
+    const start = new Date(end.getTime() - hours * 60 * 60 * 1000);
     const params = new URLSearchParams({
       ident: IDENT,
       type: "value",
@@ -24,20 +43,11 @@ async function refresh() {
       throw new Error(`API ${res.status}`);
     }
     const rows = await res.json();
-    const latest = Array.isArray(rows) && rows.length ? rows[rows.length - 1] : null;
-
-    if (!latest) {
-      setText("connState", "keine Daten im Zeitraum");
-      return;
+    if (Array.isArray(rows) && rows.length) {
+      return rows[rows.length - 1];
     }
-
-    render(latest);
-    setText("connState", "verbunden");
-    setText("lastSeen", new Date().toLocaleString("de-DE"));
-  } catch (err) {
-    setText("connState", "api-fehler");
-    console.error("Live refresh failed", err);
   }
+  return null;
 }
 
 function render(data) {
