@@ -73,10 +73,12 @@ function getFilterValues() {
 }
 
 async function fetchData(start, end) {
+  const startIso = toIsoOrFallback(start, true);
+  const endIso = toIsoOrFallback(end, false);
   const params = new URLSearchParams({
     ident: IDENT,
-    start,
-    end,
+    start: startIso,
+    end: endIso,
   });
   const res = await fetch(`/.netlify/functions/data?${params.toString()}`);
   if (!res.ok) {
@@ -344,4 +346,17 @@ function formatDateTimeLocal(date) {
   const offset = date.getTimezoneOffset();
   const local = new Date(date.getTime() - offset * 60 * 1000);
   return local.toISOString().slice(0, 16);
+}
+
+function toIsoOrFallback(value, isStart) {
+  const parsed = new Date(value);
+  if (!Number.isNaN(parsed.getTime())) {
+    if (isStart) {
+      parsed.setSeconds(0, 0);
+    } else {
+      parsed.setSeconds(59, 999);
+    }
+    return parsed.toISOString();
+  }
+  return value;
 }

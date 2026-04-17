@@ -2,84 +2,134 @@
 <html lang="de">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Echtzeit Leisenhof Reaktor 1</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Leisenhof Live Daten</title>
   <style>
-    body { margin: 0; background: #f0f0f0; }
-    #schema-container {
-      position: relative;
-      width: 100%;
-      max-width: 1200px;
-      margin: auto;
-      aspect-ratio: 16/9;
-      background-image: url("images/Solos_Reactor1.jpg");
-      background-size: contain;
-      background-repeat: no-repeat;
-      background-position: center;
-      border: 1px solid #ccc;
+    :root {
+      --bg: #f3f7fb;
+      --ink: #0f172a;
+      --muted: #475569;
+      --card: #ffffff;
+      --line: #dbe5f1;
+      --ok: #0f766e;
     }
-    .value-overlay {
-      position: absolute;
-      background: rgba(255,255,255,0.7);
-      border: 1px solid black;
-      padding: 1px 3px; 
-      font-family: Arial, sans-serif;
-      font-size: clamp(10px, 1vw, 14px);
-      white-space: nowrap;
-      min-width: 50px;
-      max-width: 110px;
-      text-align: center;
-      border-radius: 4px;
+
+    * {
+      box-sizing: border-box;
     }
-    /* Positionen in Prozent für Desktop */
-    #tempT1   { top: 72%; left: 75%; }
-    #tempT2   { top: 38%; left: 86%; }
-    #tempT3   { top: 72%; left: 86%; }
-    #tempT5   { top: 16%; left: 19%; }
-    #tempTF1  { top: 43%; left: 75%; }
-    #tempBioUp  { top: 41%; left: 8%; }
-    #tempBioMid { top: 55%; left: 8%; }
-    #tempBioLow { top: 70%; left: 8%; }
-    /* responsive Anpassung bei Smartphones */
-    @media (max-width: 600px) {
-      .value-overlay {
-        padding: 0.5px 1px;
-        font-size: 8px;
-      }
-      #tempT1   { top: 71%; left: 72%; }
-      #tempT2   { top: 34%; left: 82%; }
-      #tempT3   { top: 76%; left: 82%; }
-      #tempT5   { top: 16%; left: 15%; }
-      #tempTF1  { top: 44%; left: 72%; }
-      #tempBioUp  { top: 41%; left: 8%; }
-      #tempBioMid { top: 55%; left: 8%; }
-      #tempBioLow { top: 70%; left: 8%; }
+
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Arial, sans-serif;
+      background: linear-gradient(180deg, #eef4fb, #f8fafc);
+      color: var(--ink);
+      padding: 1rem;
     }
+
+    .wrap {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(1.4rem, 2vw, 1.9rem);
+    }
+
+    .status {
+      margin-top: 0.35rem;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .status strong {
+      color: var(--ok);
+    }
+
+    .grid {
+      margin-top: 1rem;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+      gap: 0.8rem;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 0.8rem;
+      box-shadow: 0 5px 16px rgba(15, 23, 42, 0.06);
+    }
+
+    .k {
+      font-size: 0.76rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 0.35rem;
+    }
+
+    .v {
+      font-size: 1.35rem;
+      font-weight: 700;
+    }
+
+    .row {
+      margin-top: 1rem;
+      display: flex;
+      gap: 0.8rem;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .pill {
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 0.35rem 0.65rem;
+      background: #fff;
+      color: #1e293b;
+      font-size: 0.9rem;
+    }
+
     a {
-      display: block;
-      margin: 1rem auto;
-      width: fit-content;
+      color: #1d4ed8;
       text-decoration: none;
-      color: blue;
-      font-weight: bold;
+      font-weight: 600;
     }
   </style>
-  <!-- mqtt.js CDN -->
   <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
 </head>
 <body>
-  <div id="schema-container">
-    <div id="tempT1" class="value-overlay">T1: --°C</div>
-    <div id="tempT2" class="value-overlay">T2: --°C</div>
-    <div id="tempT3" class="value-overlay">T3: --°C</div>
-    <div id="tempT5" class="value-overlay">T5: --°C</div>
-    <div id="tempTF1" class="value-overlay">TF1: --°C</div>
-    <div id="tempBioUp" class="value-overlay">T_up: --°C</div>
-    <div id="tempBioMid" class="value-overlay">T_mid: --°C</div>
-    <div id="tempBioLow" class="value-overlay">T_low: --°C</div>
-  </div>
+  <main class="wrap">
+    <h1>Leisenhof Live Monitoring (LH)</h1>
+    <div class="status">
+      MQTT: <strong id="connState">verbinde...</strong> | Letztes Paket: <span id="lastSeen">-</span>
+    </div>
 
-  <a href="index.html">Zu den historischen Daten</a>
+    <section class="row">
+      <span class="pill">ident: <span id="identValue">-</span></span>
+      <span class="pill">topic: <span id="topicValue">-</span></span>
+      <span class="pill">ts: <span id="tsValue">-</span></span>
+      <a href="index.html">Zur historischen Visualisierung</a>
+    </section>
+
+    <section class="grid">
+      <article class="card"><div class="k">P_Heat</div><div class="v" id="P_Heat">-</div></article>
+      <article class="card"><div class="k">P_Pool</div><div class="v" id="P_Pool">-</div></article>
+      <article class="card"><div class="k">P_WP_cool</div><div class="v" id="P_WP_cool">-</div></article>
+      <article class="card"><div class="k">P_WP_el</div><div class="v" id="P_WP_el">-</div></article>
+      <article class="card"><div class="k">P_WP_heat</div><div class="v" id="P_WP_heat">-</div></article>
+      <article class="card"><div class="k">P_R1</div><div class="v" id="P_R1">-</div></article>
+      <article class="card"><div class="k">P_R2</div><div class="v" id="P_R2">-</div></article>
+      <article class="card"><div class="k">COP</div><div class="v" id="COP">-</div></article>
+      <article class="card"><div class="k">EER</div><div class="v" id="EER">-</div></article>
+      <article class="card"><div class="k">T_2000l_top</div><div class="v" id="T_2000l_top">-</div></article>
+      <article class="card"><div class="k">T_VL_pool</div><div class="v" id="T_VL_pool">-</div></article>
+      <article class="card"><div class="k">T_VL_heating</div><div class="v" id="T_VL_heating">-</div></article>
+      <article class="card"><div class="k">T_max_BIO</div><div class="v" id="T_max_BIO">-</div></article>
+      <article class="card"><div class="k">T_max_BIO_R2</div><div class="v" id="T_max_BIO_R2">-</div></article>
+    </section>
+  </main>
 
   <script src="live_leisenhof_reactor1.js"></script>
 </body>
