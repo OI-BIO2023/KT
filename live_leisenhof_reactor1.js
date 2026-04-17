@@ -69,7 +69,6 @@ function render(data) {
   setMetric("poolPower", data.P_Pool, "kW");
   setMetric("poolTemp", data.T_VL_Pool, "degC");
   setMetric("airPower", pL, "kW");
-
 }
 
 function sum(obj, keys) {
@@ -87,7 +86,7 @@ function setMetric(id, value, unit) {
     setText(id, "-");
     return;
   }
-  const suffix = unit === "degC" ? " °C" : unit ? ` ${unit}` : "";
+  const suffix = unit === "degC" ? " \u00b0C" : unit ? ` ${unit}` : "";
   setText(id, `${num.toFixed(1)}${suffix}`);
 }
 
