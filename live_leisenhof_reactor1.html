@@ -10,13 +10,11 @@
       --ink: #e6eefc;
       --muted: #aab9d7;
       --line: #f0f4ff;
-      --hotel: #d8c2a3;
-      --technik: #f59e0b;
-      --r1: #a855f7;
-      --r2: #6d28d9;
+      --hotel: #d4af37;
       --air: #1e3a8a;
       --pool: #3b82f6;
       --thermo: #6b8e23;
+      --temp-red: #ff5959;
       --card: rgba(10, 15, 28, 0.82);
       --border: rgba(255, 255, 255, 0.22);
     }
@@ -103,16 +101,16 @@
 
     .flow line {
       stroke: var(--line);
-      stroke-width: 0.8;
+      stroke-width: 0.75;
       stroke-linecap: round;
-      filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.55));
-      opacity: 0.56;
+      filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.5));
+      opacity: 0.46;
     }
 
     .panel {
       position: absolute;
-      min-width: 132px;
-      max-width: min(31vw, 230px);
+      min-width: 140px;
+      max-width: min(32vw, 238px);
       background: var(--card);
       border: 1px solid var(--border);
       border-left: 6px solid #ffffff;
@@ -124,7 +122,7 @@
     }
 
     .panel .title {
-      font-weight: 700;
+      font-weight: 400;
       text-transform: uppercase;
       letter-spacing: 0.04em;
       margin-bottom: 0.28rem;
@@ -132,21 +130,26 @@
 
     .panel .row {
       display: flex;
-      justify-content: flex-end;
+      justify-content: space-between;
       gap: 0.5rem;
       margin-top: 0.12rem;
       white-space: nowrap;
       color: #f4f8ff;
-      font-weight: 700;
+      font-weight: 400;
       font-size: 1.05em;
+    }
+
+    .panel .k {
+      color: #cfddf7;
+      margin-right: 0.45rem;
     }
 
     .panel.hotel { left: 10%; top: 15%; border-left-color: var(--hotel); }
     .panel.technik { left: 35%; top: 46%; border-left-color: #7f1d1d; }
-    .panel.r1 { left: 51%; top: 56%; border-left-color: var(--r1); }
-    .panel.r2 { left: 72%; top: 55%; border-left-color: var(--r2); }
-    .panel.air { left: 82%; top: 84%; border-left-color: var(--air); }
-    .panel.pool { left: 2%; top: 54%; border-left-color: var(--pool); min-width: 120px; }
+    .panel.r1 { left: 51%; top: 56%; border-left-color: #a855f7; }
+    .panel.r2 { left: 72%; top: 55%; border-left-color: #6d28d9; }
+    .panel.air { left: 82%; top: 77%; border-left-color: var(--air); }
+    .panel.pool { left: 2%; top: 54%; border-left-color: var(--pool); min-width: 124px; }
 
     .thermo {
       position: absolute;
@@ -157,18 +160,35 @@
       color: #f4ffe8;
       padding: 0.34rem 0.5rem;
       font-size: clamp(10px, 0.76vw, 14px);
-      font-weight: 700;
+      font-weight: 400;
       backdrop-filter: blur(2px);
     }
 
+    .thermo .k {
+      color: #dbe9cb;
+      margin-right: 0.35rem;
+    }
+
+    .thermo .v {
+      color: var(--temp-red);
+      font-weight: 400;
+    }
+
     .thermo .ticon {
-      margin-right: 0.28rem;
+      margin-right: 0.25rem;
       opacity: 0.95;
     }
 
-    .thermo.r1t { left: 58%; top: 63%; }
-    .thermo.r2t { left: 79%; top: 62%; }
+    .thermo.r1t { left: 52%; top: 50%; }
+    .thermo.r2t { left: 73%; top: 49%; }
     .thermo.hotelt { left: 18%; top: 22%; }
+    .thermo.poolt {
+      left: 2%;
+      top: 62.5%;
+      border-left-color: #ef4444;
+      border-color: rgba(248, 113, 113, 0.8);
+      background: rgba(50, 12, 12, 0.9);
+    }
 
     .hidden {
       display: none !important;
@@ -194,14 +214,16 @@
       .panel.technik { left: 26%; top: 40%; }
       .panel.r1 { left: 59%; top: 50%; }
       .panel.r2 { left: 60%; top: 63%; }
-      .panel.air { left: 60%; top: 86%; }
+      .panel.air { left: 60%; top: 78%; }
       .panel.pool { left: 4%; top: 59%; }
-      .thermo.r1t { left: 62%; top: 57%; }
-      .thermo.r2t { left: 63%; top: 70%; }
+
+      .thermo.r1t { left: 63%; top: 44%; }
+      .thermo.r2t { left: 64%; top: 58%; }
       .thermo.hotelt { left: 22%; top: 17%; }
+      .thermo.poolt { left: 4%; top: 67%; }
 
       .flow line {
-        stroke-width: 1.1;
+        stroke-width: 1.05;
       }
     }
   </style>
@@ -239,45 +261,47 @@
 
       <article class="panel hotel">
         <div class="title">Hotel</div>
-        <div class="row"><span id="hotelPHeat">-</span></div>
+        <div class="row"><span class="k">P_HEAT</span><span id="hotelPHeat">-</span></div>
       </article>
 
       <article class="panel technik">
-        <div class="title">Technikraum</div>
-        <div class="row"><span id="technikPWpEl">-</span></div>
-        <div id="technikHeatRow" class="row"><span id="technikPWpHeat">-</span></div>
-        <div id="technikCoolRow" class="row"><span id="technikPWpCool">-</span></div>
+        <div class="title">Wärmepumpen</div>
+        <div class="row"><span class="k">P_WP_EL</span><span id="technikPWpEl">-</span></div>
+        <div id="technikHeatRow" class="row"><span class="k">P_WP_HEAT</span><span id="technikPWpHeat">-</span></div>
+        <div id="technikCoolRow" class="row"><span class="k">P_WP_COOL</span><span id="technikPWpCool">-</span></div>
       </article>
 
       <article class="panel r1">
         <div class="title">Reaktor 1</div>
-        <div class="row"><span id="r1Power">-</span></div>
+        <div class="row"><span class="k">P_R1</span><span id="r1Power">-</span></div>
       </article>
 
       <article class="panel r2">
         <div class="title">Reaktor 2</div>
-        <div class="row"><span id="r2Power">-</span></div>
+        <div class="row"><span class="k">P_R2</span><span id="r2Power">-</span></div>
       </article>
 
       <article class="panel air">
         <div class="title">Luft</div>
-        <div class="row"><span id="airPower">-</span></div>
+        <div class="row"><span class="k">P_L</span><span id="airPower">-</span></div>
       </article>
 
       <article class="panel pool">
         <div class="title">Pool</div>
-        <div class="row"><span id="poolPower">-</span></div>
-        <div class="row"><span id="poolTemp">-</span></div>
+        <div class="row"><span class="k">P_POOL</span><span id="poolPower">-</span></div>
       </article>
 
       <article class="thermo r1t">
-        <span class="ticon">🌡</span><span id="r1Temp">-</span>
+        <span class="ticon">&#127777;</span><span class="k">T_MAX_BIO</span><span class="v" id="r1Temp">-</span>
       </article>
       <article class="thermo r2t">
-        <span class="ticon">🌡</span><span id="r2Temp">-</span>
+        <span class="ticon">&#127777;</span><span class="k">T_MAX_BIO_R2</span><span class="v" id="r2Temp">-</span>
       </article>
       <article class="thermo hotelt">
-        <span class="ticon">🌡</span><span id="hotelTVlHeat">-</span>
+        <span class="ticon">&#127777;</span><span class="k">T_VL_HEATING</span><span class="v" id="hotelTVlHeat">-</span>
+      </article>
+      <article class="thermo poolt">
+        <span class="ticon">&#127777;</span><span class="k">T_VL_POOL</span><span class="v" id="poolTemp">-</span>
       </article>
     </section>
   </main>
