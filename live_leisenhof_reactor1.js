@@ -56,7 +56,7 @@ function render(data) {
   const pWpHeat = sum(data, ["P_heat_1", "P_heat_2"]);
   const pR1 = sum(data, ["P_lat_A", "P_sen_B", "P_lat_C", "P_sen_D"]);
   const pR2 = sum(data, ["P_lat_A_R2", "P_lat_C_R2", "P_sen_B_R2", "P_sen_D_R2"]);
-  const pL = pWpHeat + pWpCool - pR1 - pR2;
+  const pL = pWpEl > 0 ? (pWpHeat + pWpCool - pR1 - pR2) : 0;
 
   setMetric("technikPWpEl", pWpEl, "kW");
   setMetric("technikPWpHeat", pWpHeat, "kW");
