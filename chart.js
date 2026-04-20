@@ -3,7 +3,7 @@ const WP_DIVISOR = 10;
 const WP_SCALE_KEYS = new Set(["P_heat_1", "P_cool_1", "P_el_1", "P_heat_2", "P_cool_2", "P_el_2"]);
 const COLORS = {
   wp: "#6b7280",
-  wp2: "#94a3b8",
+  wp2: "#38bdf8",
   r1: "#a3291b",
   r2: "#d4552f",
   air: "#1e3a8a",
@@ -24,7 +24,6 @@ document.addEventListener("DOMContentLoaded", () => {
 async function loadData() {
   const { start, end } = getFilterValues();
   setLoadingState(true);
-
   try {
     const raw = await fetchData(start, end);
     const normalized = normalizeData(raw);
@@ -69,7 +68,6 @@ async function fetchData(start, end) {
     start: startIso,
     end: endIso,
   });
-
   const res = await fetch(`/.netlify/functions/data?${params.toString()}`);
   if (!res.ok) throw new Error(`API ${res.status}`);
   return res.json();
@@ -141,7 +139,7 @@ function renderEnergyChart(points) {
   const ctx = document.getElementById("energyChart").getContext("2d");
   const bounds = computeBounds(
     points.flatMap((p) => [p.P_WP1, p.P_WP2, p.P_R1, p.P_R2, p.P_L]),
-    { includeZero: true, symmetric: true }
+    { includeZero: true, symmetric: true, absQ: 0.8 }
   );
 
   const datasets = [
@@ -162,7 +160,7 @@ function renderEnergyChart(points) {
       label: "Leistung Waermepumpe 2",
       data: points.map((p) => ({ x: p.time, y: p.P_WP2 })),
       borderColor: COLORS.wp2,
-      backgroundColor: "rgba(148,163,184,0.38)",
+      backgroundColor: "rgba(56,189,248,0.34)",
       fill: "-1",
       tension: 0.22,
       pointRadius: 0,
@@ -216,7 +214,7 @@ function renderTempChart(points) {
   const ctx = document.getElementById("tempChart").getContext("2d");
   const bounds = computeBounds(
     points.flatMap((p) => [p.T_VL_hotel, p.T_VL_pool, p.T_puffer_2000l, p.T_max_R1, p.T_max_R2]),
-    { includeZero: false, symmetric: false }
+    { includeZero: false, symmetric: false, lowQ: 0.15, highQ: 0.85 }
   );
 
   const datasets = [
@@ -231,7 +229,7 @@ function renderTempChart(points) {
   tempChart = new Chart(ctx, {
     type: "line",
     data: { datasets },
-    options: buildChartOptions("Temperatur (°C)", "°C", bounds),
+    options: buildChartOptions("Temperatur (\u00b0C)", "\u00b0C", bounds),
   });
 }
 
@@ -270,8 +268,8 @@ function buildChartOptions(yTitle, unit, yBounds) {
 function computeBounds(values, opts) {
   const clean = values.filter((v) => Number.isFinite(v)).sort((a, b) => a - b);
   if (!clean.length) return { min: opts.includeZero ? 0 : -1, max: 1 };
-  const low = percentile(clean, 0.05);
-  const high = percentile(clean, 0.95);
+  const low = percentile(clean, opts.lowQ ?? 0.05);
+  const high = percentile(clean, opts.highQ ?? 0.95);
   let min = low;
   let max = high;
   if (opts.includeZero) {
@@ -279,7 +277,8 @@ function computeBounds(values, opts) {
     max = Math.max(max, 0);
   }
   if (opts.symmetric) {
-    const m = Math.max(Math.abs(min), Math.abs(max));
+    const absSorted = clean.map((v) => Math.abs(v)).sort((a, b) => a - b);
+    const m = percentile(absSorted, opts.absQ ?? 0.9);
     min = -m;
     max = m;
   }
@@ -320,7 +319,7 @@ function updateHighlights(points) {
   setText("sumR1Value", `${formatNumber(r1Kwh)} kWh`);
   setText("sumR2Value", `${formatNumber(r2Kwh)} kWh`);
   setText("sumLValue", `${formatNumber(lKwh)} kWh`);
-  setText("tMaxPairValue", `${formatNumber(tMaxR1)} °C / ${formatNumber(tMaxR2)} °C`);
+  setText("tMaxPairValue", `${formatNumber(tMaxR1)} \u00b0C / ${formatNumber(tMaxR2)} \u00b0C`);
 }
 
 function integrateKwh(points, key) {

@@ -192,6 +192,13 @@
 
     .hidden { display: none !important; }
 
+    .copyright {
+      margin-top: 0.9rem;
+      color: var(--muted);
+      font-size: 0.78rem;
+      text-align: right;
+    }
+
     @media (max-width: 760px) {
       body { padding: 0.75rem; }
       .head {
@@ -239,17 +246,17 @@
           <span class="stat-meta">Nur bei Heizbetrieb</span>
         </article>
         <article class="stat-card">
-          <span class="stat-label">Produzierte Energie Reaktor 1</span>
+          <span class="stat-label">PROD. Energie Reaktor 1</span>
           <span class="stat-value" id="sumR1Value">-</span>
           <span class="stat-meta">Integral als Energie</span>
         </article>
         <article class="stat-card">
-          <span class="stat-label">Produzierte Energie Reaktor 2</span>
+          <span class="stat-label">PROD. Energie Reaktor 2</span>
           <span class="stat-value" id="sumR2Value">-</span>
           <span class="stat-meta">Integral als Energie</span>
         </article>
         <article class="stat-card">
-          <span class="stat-label">Produzierte Energie Luft</span>
+          <span class="stat-label">PROD. Energie Luft</span>
           <span class="stat-value" id="sumLValue">-</span>
           <span class="stat-meta">Integral als Energie</span>
         </article>
@@ -272,6 +279,7 @@
         <canvas id="tempChart"></canvas>
       </article>
     </section>
+    <div class="copyright">&copy; Biologik Systems GmbH</div>
   </main>
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>

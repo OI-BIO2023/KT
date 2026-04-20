@@ -43,11 +43,12 @@
       display: flex;
       align-items: center;
       justify-content: center;
+      padding: 12px;
     }
 
     .scene {
       position: relative;
-      width: min(100vw, 1220px);
+      width: min(calc((100dvh - 24px) * 1.536), calc(100vw - 24px), 1220px);
       aspect-ratio: 1536 / 1000;
       margin: 0 auto;
       border-radius: 0;
@@ -124,7 +125,7 @@
     .hotel-pair { left: 8.7%; top: 13.7%; }
     .r1-pair { left: 49.8%; top: 48.8%; }
     .r2-pair { left: 75.9%; top: 39.1%; }
-    .pool-pair { left: 1.8%; top: 60.2%; }
+    .pool-pair { left: 1.8%; top: 63.2%; }
 
     .hotel { border-left-color: var(--hotel); min-width: 196px; max-width: 224px; }
     .r1 { border-left-color: var(--r1); min-width: 230px; max-width: 260px; }
@@ -196,7 +197,7 @@
 
     .scene-update {
       font-size: 0.78rem;
-      color: var(--muted);
+      color: #f8fbff;
       text-shadow: 0 2px 6px rgba(0, 0, 0, 0.6);
       white-space: nowrap;
     }
@@ -222,6 +223,17 @@
       z-index: 6;
     }
 
+    .scene-copyright {
+      position: absolute;
+      right: 0.8rem;
+      bottom: 0.6rem;
+      z-index: 4;
+      color: rgba(248, 251, 255, 0.86);
+      font-size: 0.72rem;
+      text-shadow: 0 2px 6px rgba(0, 0, 0, 0.55);
+      white-space: nowrap;
+    }
+
     @media (max-width: 980px) {
       .box {
         font-size: clamp(14px, 2.15vw, 18px);
@@ -240,8 +252,8 @@
       }
 
       .scene {
-        width: calc(100dvh * 1.536);
-        min-width: calc(100dvh * 1.536);
+        width: calc(100dvh * 1.45);
+        min-width: calc(100dvh * 1.45);
         height: 100dvh;
         aspect-ratio: auto;
         border-radius: 0;
@@ -249,6 +261,12 @@
       }
 
       .scene img { object-fit: cover; }
+
+      .box {
+        padding: 0.4rem 0.5rem;
+        font-size: clamp(14px, 3.9vw, 17px);
+        line-height: 1.08;
+      }
 
       .scene-top-right {
         right: 0.5rem;
@@ -259,14 +277,20 @@
       .scene-update { font-size: 0.68rem; }
 
       .scene-history {
-        font-size: 0.92rem;
-        padding: 0.34rem 0.56rem;
+        font-size: 1.08rem;
+        padding: 0.48rem 0.78rem;
       }
 
       .scene-title {
         left: 0.6rem;
         bottom: 0.55rem;
-        font-size: clamp(1rem, 4.6vw, 1.45rem);
+        font-size: clamp(1.24rem, 5.2vw, 1.75rem);
+      }
+
+      .scene-copyright {
+        right: 0.5rem;
+        bottom: 0.45rem;
+        font-size: 0.62rem;
       }
     }
   </style>
@@ -276,9 +300,10 @@
     <section class="scene">
       <div class="scene-top-right">
         <div class="scene-update">Letztes Update: <strong id="lastSeen">-</strong></div>
-        <a class="scene-history" href="/index.html" onclick="window.location.assign('/index.html'); return false;">Historie</a>
+        <a class="scene-history" href="index.html">Historie</a>
       </div>
       <div class="scene-title">Leisenhof Live Monitoring</div>
+      <div class="scene-copyright">&copy; Biologik Systems GmbH</div>
       <img src="Reactors_4.png" alt="Leisenhof Anlage" />
 
       <svg class="flow" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
