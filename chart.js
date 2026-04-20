@@ -98,16 +98,16 @@ function normalizeData(items) {
       return {
         time,
         COP: sanitizeRange(cop, 0, 20),
-        P_WP1: sanitizeRange(pWp1Heat + pWp1Cool, -500, 500),
-        P_WP2: sanitizeRange(pWp2Heat + pWp2Cool, -500, 500),
-        P_R1: sanitizeRange(pR1, -500, 500),
-        P_R2: sanitizeRange(pR2, -500, 500),
-        P_L: sanitizeRange(pL, -500, 500),
-        T_VL_hotel: sanitizeRange(toNumber(scaled.T_VL_heating), -20, 120),
-        T_VL_pool: sanitizeRange(toNumber(scaled.T_VL_Pool), -20, 120),
-        T_puffer_2000l: sanitizeRange(toNumber(scaled.T_2000l_top), -20, 120),
-        T_max_R1: sanitizeRange(toNumber(scaled.T_max_BIO), -20, 120),
-        T_max_R2: sanitizeRange(toNumber(scaled.T_max_BIO_R2), -20, 120),
+        P_WP1: sanitizeRange(pWp1Heat + pWp1Cool, -200, 200),
+        P_WP2: sanitizeRange(pWp2Heat + pWp2Cool, -200, 200),
+        P_R1: sanitizeRange(pR1, -200, 200),
+        P_R2: sanitizeRange(pR2, -200, 200),
+        P_L: sanitizeRange(pL, -200, 200),
+        T_VL_hotel: sanitizeRange(toNumber(scaled.T_VL_heating), -5, 90),
+        T_VL_pool: sanitizeRange(toNumber(scaled.T_VL_Pool), -5, 90),
+        T_puffer_2000l: sanitizeRange(toNumber(scaled.T_2000l_top), -5, 90),
+        T_max_R1: sanitizeRange(toNumber(scaled.T_max_BIO), -5, 90),
+        T_max_R2: sanitizeRange(toNumber(scaled.T_max_BIO_R2), -5, 90),
       };
     })
     .filter(Boolean)
@@ -202,12 +202,8 @@ function renderEnergyChart(points) {
     },
   ];
 
-  if (energyChart) energyChart.destroy();
-  energyChart = new Chart(ctx, {
-    type: "line",
-    data: { datasets },
-    options: buildChartOptions("Leistung (kW)", "kW", bounds),
-  });
+  const options = buildChartOptions("Leistung (kW)", "kW", bounds);
+  energyChart = upsertChart(energyChart, ctx, datasets, options);
 }
 
 function renderTempChart(points) {
@@ -225,18 +221,21 @@ function renderTempChart(points) {
     { label: "Temperatur Max R2", data: points.map((p) => ({ x: p.time, y: p.T_max_R2 })), borderColor: COLORS.r2, backgroundColor: COLORS.r2 },
   ].map((d) => ({ ...d, fill: false, tension: 0.22, pointRadius: 0, borderWidth: 2 }));
 
-  if (tempChart) tempChart.destroy();
-  tempChart = new Chart(ctx, {
-    type: "line",
-    data: { datasets },
-    options: buildChartOptions("Temperatur (\u00b0C)", "\u00b0C", bounds),
-  });
+  const options = buildChartOptions("Temperatur (\u00b0C)", "\u00b0C", bounds);
+  tempChart = upsertChart(tempChart, ctx, datasets, options);
 }
 
 function buildChartOptions(yTitle, unit, yBounds) {
   return {
     responsive: true,
     maintainAspectRatio: false,
+    normalized: true,
+    animation: false,
+    spanGaps: true,
+    transitions: {
+      active: { animation: { duration: 0 } },
+      resize: { animation: { duration: 0 } },
+    },
     interaction: { intersect: false, mode: "index" },
     scales: {
       x: {
@@ -371,6 +370,20 @@ function sanitizeRange(value, min, max) {
   if (!Number.isFinite(num)) return null;
   if (num < min || num > max) return null;
   return num;
+}
+
+function upsertChart(chart, ctx, datasets, options) {
+  if (!chart) {
+    return new Chart(ctx, {
+      type: "line",
+      data: { datasets },
+      options,
+    });
+  }
+  chart.data.datasets = datasets;
+  chart.options = options;
+  chart.update("none");
+  return chart;
 }
 
 function toNumber(value) {
