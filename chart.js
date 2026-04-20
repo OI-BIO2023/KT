@@ -97,17 +97,17 @@ function normalizeData(items) {
 
       return {
         time,
-        COP: cop,
-        P_WP1: pWp1Heat + pWp1Cool,
-        P_WP2: pWp2Heat + pWp2Cool,
-        P_R1: pR1,
-        P_R2: pR2,
-        P_L: pL,
-        T_VL_hotel: toNumber(scaled.T_VL_heating),
-        T_VL_pool: toNumber(scaled.T_VL_Pool),
-        T_puffer_2000l: toNumber(scaled.T_2000l_top),
-        T_max_R1: toNumber(scaled.T_max_BIO),
-        T_max_R2: toNumber(scaled.T_max_BIO_R2),
+        COP: sanitizeRange(cop, 0, 20),
+        P_WP1: sanitizeRange(pWp1Heat + pWp1Cool, -500, 500),
+        P_WP2: sanitizeRange(pWp2Heat + pWp2Cool, -500, 500),
+        P_R1: sanitizeRange(pR1, -500, 500),
+        P_R2: sanitizeRange(pR2, -500, 500),
+        P_L: sanitizeRange(pL, -500, 500),
+        T_VL_hotel: sanitizeRange(toNumber(scaled.T_VL_heating), -20, 120),
+        T_VL_pool: sanitizeRange(toNumber(scaled.T_VL_Pool), -20, 120),
+        T_puffer_2000l: sanitizeRange(toNumber(scaled.T_2000l_top), -20, 120),
+        T_max_R1: sanitizeRange(toNumber(scaled.T_max_BIO), -20, 120),
+        T_max_R2: sanitizeRange(toNumber(scaled.T_max_BIO_R2), -20, 120),
       };
     })
     .filter(Boolean)
@@ -139,7 +139,7 @@ function renderEnergyChart(points) {
   const ctx = document.getElementById("energyChart").getContext("2d");
   const bounds = computeBounds(
     points.flatMap((p) => [p.P_WP1, p.P_WP2, p.P_R1, p.P_R2, p.P_L]),
-    { includeZero: true, symmetric: true, absQ: 0.72, padRatio: 0.08 }
+    { includeZero: true, useExtrema: true, padRatio: 0.08, minSpan: 10 }
   );
 
   const datasets = [
@@ -214,7 +214,7 @@ function renderTempChart(points) {
   const ctx = document.getElementById("tempChart").getContext("2d");
   const bounds = computeBounds(
     points.flatMap((p) => [p.T_VL_hotel, p.T_VL_pool, p.T_puffer_2000l, p.T_max_R1, p.T_max_R2]),
-    { includeZero: false, symmetric: false, lowQ: 0.2, highQ: 0.8, padRatio: 0.06, minSpan: 6 }
+    { includeZero: false, useExtrema: true, padRatio: 0.06, minSpan: 8 }
   );
 
   const datasets = [
@@ -268,8 +268,8 @@ function buildChartOptions(yTitle, unit, yBounds) {
 function computeBounds(values, opts) {
   const clean = values.filter((v) => Number.isFinite(v)).sort((a, b) => a - b);
   if (!clean.length) return { min: opts.includeZero ? 0 : -1, max: 1 };
-  const low = percentile(clean, opts.lowQ ?? 0.05);
-  const high = percentile(clean, opts.highQ ?? 0.95);
+  const low = opts.useExtrema ? clean[0] : percentile(clean, opts.lowQ ?? 0.05);
+  const high = opts.useExtrema ? clean[clean.length - 1] : percentile(clean, opts.highQ ?? 0.95);
   let min = low;
   let max = high;
   if (opts.includeZero) {
@@ -364,6 +364,13 @@ function averagePositive(values) {
 function average(values) {
   if (!values.length) return NaN;
   return values.reduce((a, b) => a + b, 0) / values.length;
+}
+
+function sanitizeRange(value, min, max) {
+  const num = Number(value);
+  if (!Number.isFinite(num)) return null;
+  if (num < min || num > max) return null;
+  return num;
 }
 
 function toNumber(value) {
