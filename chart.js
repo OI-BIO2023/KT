@@ -255,6 +255,17 @@ function buildChartOptions(yTitle, unit, yBounds) {
     },
     plugins: {
       legend: { labels: { color: "#e4ecfb" } },
+      zoom: {
+        pan: {
+          enabled: true,
+          mode: "x",
+        },
+        zoom: {
+          wheel: { enabled: true },
+          pinch: { enabled: true },
+          mode: "x",
+        },
+      },
       tooltip: {
         callbacks: {
           label: (ctx) => `${ctx.dataset.label}: ${formatNumber(ctx.parsed.y)} ${unit}`,
@@ -374,11 +385,18 @@ function sanitizeRange(value, min, max) {
 
 function upsertChart(chart, ctx, datasets, options) {
   if (!chart) {
-    return new Chart(ctx, {
+    const created = new Chart(ctx, {
       type: "line",
       data: { datasets },
       options,
     });
+    if (!ctx.canvas.dataset.zoomBound) {
+      ctx.canvas.addEventListener("dblclick", () => {
+        if (typeof created.resetZoom === "function") created.resetZoom();
+      });
+      ctx.canvas.dataset.zoomBound = "1";
+    }
+    return created;
   }
   chart.data.datasets = datasets;
   chart.options = options;
