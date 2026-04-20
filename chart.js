@@ -3,7 +3,7 @@ const WP_DIVISOR = 10;
 const WP_SCALE_KEYS = new Set(["P_heat_1", "P_cool_1", "P_el_1", "P_heat_2", "P_cool_2", "P_el_2"]);
 const COLORS = {
   wp: "#6b7280",
-  wp2: "#38bdf8",
+  wp2: "#7dd3fc",
   r1: "#a3291b",
   r2: "#d4552f",
   air: "#1e3a8a",
@@ -139,7 +139,7 @@ function renderEnergyChart(points) {
   const ctx = document.getElementById("energyChart").getContext("2d");
   const bounds = computeBounds(
     points.flatMap((p) => [p.P_WP1, p.P_WP2, p.P_R1, p.P_R2, p.P_L]),
-    { includeZero: true, symmetric: true, absQ: 0.8 }
+    { includeZero: true, symmetric: true, absQ: 0.72, padRatio: 0.08 }
   );
 
   const datasets = [
@@ -148,7 +148,7 @@ function renderEnergyChart(points) {
       label: "Leistung Waermepumpe 1",
       data: points.map((p) => ({ x: p.time, y: p.P_WP1 })),
       borderColor: COLORS.wp,
-      backgroundColor: "rgba(107,114,128,0.58)",
+      backgroundColor: "rgba(107,114,128,0.62)",
       fill: "origin",
       tension: 0.22,
       pointRadius: 0,
@@ -160,7 +160,7 @@ function renderEnergyChart(points) {
       label: "Leistung Waermepumpe 2",
       data: points.map((p) => ({ x: p.time, y: p.P_WP2 })),
       borderColor: COLORS.wp2,
-      backgroundColor: "rgba(56,189,248,0.34)",
+      backgroundColor: "rgba(125,211,252,0.46)",
       fill: "-1",
       tension: 0.22,
       pointRadius: 0,
@@ -214,7 +214,7 @@ function renderTempChart(points) {
   const ctx = document.getElementById("tempChart").getContext("2d");
   const bounds = computeBounds(
     points.flatMap((p) => [p.T_VL_hotel, p.T_VL_pool, p.T_puffer_2000l, p.T_max_R1, p.T_max_R2]),
-    { includeZero: false, symmetric: false, lowQ: 0.15, highQ: 0.85 }
+    { includeZero: false, symmetric: false, lowQ: 0.2, highQ: 0.8, padRatio: 0.06, minSpan: 6 }
   );
 
   const datasets = [
@@ -282,8 +282,15 @@ function computeBounds(values, opts) {
     min = -m;
     max = m;
   }
-  const span = Math.max(0.01, max - min);
-  const pad = span * 0.12;
+  let span = Math.max(0.01, max - min);
+  const minSpan = opts.minSpan ?? 0;
+  if (span < minSpan) {
+    const center = (max + min) / 2;
+    min = center - minSpan / 2;
+    max = center + minSpan / 2;
+    span = minSpan;
+  }
+  const pad = span * (opts.padRatio ?? 0.12);
   return { min: min - pad, max: max + pad };
 }
 
